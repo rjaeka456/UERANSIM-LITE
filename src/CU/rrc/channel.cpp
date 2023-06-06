@@ -217,7 +217,6 @@ void CURrcTask::receiveRrcMessage(int ueId, ASN_RRC_UL_DCCH_Message *msg)
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_securityModeFailure:
         break; // TODO
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_ulInformationTransfer:
-        receiveUplinkInformationTransfer(ueId, *c1->choice.ulInformationTransfer);
         break;
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_locationMeasurementIndication:
         break; // TODO

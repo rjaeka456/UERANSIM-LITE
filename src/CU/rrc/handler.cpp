@@ -8,7 +8,6 @@
 
 #include "task.hpp"
 
-#include <CU/ngap/task.hpp>
 #include <lib/rrc/encode.hpp>
 
 #include <asn/ngap/ASN_NGAP_FiveG-S-TMSI.h>
@@ -39,40 +38,6 @@
 namespace nr::CU
 {
 
-void CURrcTask::handleDownlinkNasDelivery(int ueId, const OctetString &nasPdu)
-{
-    auto *pdu = asn::New<ASN_RRC_DL_DCCH_Message>();
-    pdu->message.present = ASN_RRC_DL_DCCH_MessageType_PR_c1;
-    pdu->message.choice.c1 =
-        asn::New<ASN_RRC_DL_DCCH_MessageType_t::ASN_RRC_DL_DCCH_MessageType_u::ASN_RRC_DL_DCCH_MessageType__c1>();
-    pdu->message.choice.c1->present = ASN_RRC_DL_DCCH_MessageType__c1_PR_dlInformationTransfer;
-    pdu->message.choice.c1->choice.dlInformationTransfer = asn::New<ASN_RRC_DLInformationTransfer>();
-
-    auto &c1 = pdu->message.choice.c1->choice.dlInformationTransfer->criticalExtensions;
-    c1.present = ASN_RRC_DLInformationTransfer__criticalExtensions_PR_dlInformationTransfer;
-    c1.choice.dlInformationTransfer = asn::New<ASN_RRC_DLInformationTransfer_IEs>();
-    c1.choice.dlInformationTransfer->dedicatedNAS_Message = asn::New<ASN_RRC_DedicatedNAS_Message_t>();
-    asn::SetOctetString(*c1.choice.dlInformationTransfer->dedicatedNAS_Message, nasPdu);
-
-    sendRrcMessage(ueId, pdu);
-    asn::Free(asn_DEF_ASN_RRC_DL_DCCH_Message, pdu);
-}
-
-void CURrcTask::deliverUplinkNas(int ueId, OctetString &&nasPdu)
-{
-    auto w = std::make_unique<NmCURrcToNgap>(NmCURrcToNgap::UPLINK_NAS_DELIVERY);
-    w->ueId = ueId;
-    w->pdu = std::move(nasPdu);
-    m_base->ngapTask->push(std::move(w));
-}
-
-void CURrcTask::receiveUplinkInformationTransfer(int ueId, const ASN_RRC_ULInformationTransfer &msg)
-{
-    if (msg.criticalExtensions.present == ASN_RRC_ULInformationTransfer__criticalExtensions_PR_ulInformationTransfer)
-        deliverUplinkNas(
-            ueId, asn::GetOctetString(*msg.criticalExtensions.choice.ulInformationTransfer->dedicatedNAS_Message));
-}
-
 void CURrcTask::releaseConnection(int ueId)
 {
     m_logger->info("Releasing RRC connection for UE[%d]", ueId);
@@ -92,46 +57,6 @@ void CURrcTask::releaseConnection(int ueId)
 
     // Delete UE RRC context
     m_ueCtx.erase(ueId);
-}
-
-void CURrcTask::handleRadioLinkFailure(int ueId)
-{
-    // Notify NGAP task
-    auto w = std::make_unique<NmCURrcToNgap>(NmCURrcToNgap::RADIO_LINK_FAILURE);
-    w->ueId = ueId;
-    m_base->ngapTask->push(std::move(w));
-
-    // Delete UE RRC context
-    m_ueCtx.erase(ueId);
-}
-
-void CURrcTask::handlePaging(const asn::Unique<ASN_NGAP_FiveG_S_TMSI> &tmsi,
-                              const asn::Unique<ASN_NGAP_TAIListForPaging> &taiList)
-{
-    // Construct and send a Paging message
-    auto *pdu = asn::New<ASN_RRC_PCCH_Message>();
-    pdu->message.present = ASN_RRC_PCCH_MessageType_PR_c1;
-    pdu->message.choice.c1 = asn::NewFor(pdu->message.choice.c1);
-    pdu->message.choice.c1->present = ASN_RRC_PCCH_MessageType__c1_PR_paging;
-    auto &paging = pdu->message.choice.c1->choice.paging = asn::New<ASN_RRC_Paging>();
-
-    auto *record = asn::New<ASN_RRC_PagingRecord>();
-    record->ue_Identity.present = ASN_RRC_PagingUE_Identity_PR_ng_5G_S_TMSI;
-
-    OctetString tmsiOctets{};
-    tmsiOctets.appendOctet2(bits::Ranged16({
-        {10, asn::GetBitStringInt<10>(tmsi->aMFSetID)},
-        {6, asn::GetBitStringInt<10>(tmsi->aMFPointer)},
-    }));
-    tmsiOctets.append(asn::GetOctetString(tmsi->fiveG_TMSI));
-
-    asn::SetBitString(record->ue_Identity.choice.ng_5G_S_TMSI, tmsiOctets);
-
-    paging->pagingRecordList = asn::NewFor(paging->pagingRecordList);
-    asn::SequenceAdd(*paging->pagingRecordList, record);
-
-    sendRrcMessage(pdu);
-    asn::Free(asn_DEF_ASN_RRC_PCCH_Message, pdu);
 }
 
 } // namespace nr::CU

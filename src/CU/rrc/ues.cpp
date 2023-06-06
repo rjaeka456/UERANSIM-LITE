@@ -8,7 +8,6 @@
 
 #include "task.hpp"
 
-#include <CU/ngap/task.hpp>
 #include <lib/rrc/encode.hpp>
 
 namespace nr::CU

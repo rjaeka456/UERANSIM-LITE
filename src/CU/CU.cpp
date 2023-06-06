@@ -4,12 +4,8 @@
 
 #include "CU.hpp"
 #include "app/task.hpp"
-#include "gtp/task.hpp"
-#include "ngap/task.hpp"
 #include "f1ap/task.hpp"
-//#include "rls/task.hpp"
 #include "rrc/task.hpp"
-#include "sctp/task.hpp"
 
 #include <lib/app/cli_base.hpp>
 
@@ -25,13 +21,9 @@ CentralUnit::CentralUnit(CUConfig *config, app::INodeListener *nodeListener, Nts
     base->cliCallbackTask = cliCallbackTask;
 
     base->appTask = new CUAppTask(base);
-    base->sctpTask = new SctpTask(base);
     base->sctpServerTask = new SctpServerTask(base);
-    base->ngapTask = new NgapTask(base);
     base->rrcTask = new CURrcTask(base);
-    base->gtpTask = new GtpTask(base);
     base->f1apTask = new F1apTask(base);
-//    base->rlsTask = new CURlsTask(base);
 
     taskBase = base;
 }
@@ -39,23 +31,14 @@ CentralUnit::CentralUnit(CUConfig *config, app::INodeListener *nodeListener, Nts
 CentralUnit::~CentralUnit()
 {
     taskBase->appTask->quit();
-    taskBase->sctpTask->quit();
     taskBase->sctpServerTask->quit();
-    taskBase->ngapTask->quit();
     taskBase->rrcTask->quit();
-    taskBase->gtpTask->quit();
     taskBase->f1apTask->quit();
 
-//    taskBase->rlsTask->quit();
-
     delete taskBase->appTask;
-    delete taskBase->sctpTask;
     delete taskBase->sctpServerTask;
-    delete taskBase->ngapTask;
     delete taskBase->rrcTask;
-    delete taskBase->gtpTask;
     delete taskBase->f1apTask;
-//    delete taskBase->rlsTask;
 
     delete taskBase->logBase;
 
@@ -65,12 +48,8 @@ CentralUnit::~CentralUnit()
 void CentralUnit::start()
 {
     taskBase->appTask->start();
-    taskBase->sctpTask->start();
     taskBase->sctpServerTask->start();
-    taskBase->ngapTask->start();
     taskBase->rrcTask->start();
-//    taskBase->rlsTask->start();
-    taskBase->gtpTask->start();
     taskBase->f1apTask->start();
 }
 

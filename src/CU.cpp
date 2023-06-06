@@ -45,26 +45,13 @@ static nr::CU::CUConfig *ReadConfigYaml()
     result->tac = yaml::GetInt32(config, "tac", 0, 0xFFFFFF);
 
     result->f1apIp = yaml::GetIp(config, "f1apIp");
-    result->ngapIp = yaml::GetIp(config, "ngapIp");
-    result->gtpIp = yaml::GetIp(config, "gtpIp");
 
     result->f1apPort = static_cast<uint16_t>(yaml::GetInt32(config, "f1apPort", 1024, 65535));
-
-    if (yaml::HasField(config, "gtpAdvertiseIp"))
-        result->gtpAdvertiseIp = yaml::GetIp(config, "gtpAdvertiseIp");
 
     result->ignoreStreamIds = yaml::GetBool(config, "ignoreStreamIds");
     result->pagingDrx = EPagingDrx::V128;
     result->name = "UERANSIM-CU-" + std::to_string(result->plmn.mcc) + "-" + std::to_string(result->plmn.mnc) + "-" +
                    std::to_string(result->getCUId()); // NOTE: Avoid using "/" dir separator character.
-
-    for (auto &amfConfig : yaml::GetSequence(config, "amfConfigs"))
-    {
-        nr::CU::CUAmfConfig c{};
-        c.address = yaml::GetIp(amfConfig, "address");
-        c.port = static_cast<uint16_t>(yaml::GetInt32(amfConfig, "port", 1024, 65535));
-        result->amfConfigs.push_back(c);
-    }
 
     for (auto &nssai : yaml::GetSequence(config, "slices"))
     {

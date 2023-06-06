@@ -70,16 +70,9 @@ class CURrcTask : public NtsTask
 
     /* Handlers */
     void handleUplinkRrc(int ueId, rrc::RrcChannel channel, const OctetString &rrcPdu);
-    void handleDownlinkNasDelivery(int ueId, const OctetString &nasPdu);
-    void deliverUplinkNas(int ueId, OctetString &&nasPdu);
     void releaseConnection(int ueId);
-    void handleRadioLinkFailure(int ueId);
-    void handlePaging(const asn::Unique<ASN_NGAP_FiveG_S_TMSI> &tmsi,
-                      const asn::Unique<ASN_NGAP_TAIListForPaging> &taiList);
     void handleUplinkRrcCCCH(int duId, int gNB_DU_ID, std::string data);
     void handleUplinkRrcDCCH(int duId, int gNB_DU_ID, std::string data);
-
-    void receiveUplinkInformationTransfer(int ueId, const ASN_RRC_ULInformationTransfer &msg);
 
     /* RRC channel send message */
     void sendRrcMessage(ASN_RRC_BCCH_BCH_Message *msg);

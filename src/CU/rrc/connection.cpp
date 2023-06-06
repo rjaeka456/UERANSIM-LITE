@@ -8,7 +8,6 @@
 
 #include "task.hpp"
 
-#include <CU/ngap/task.hpp>
 #include <CU/f1ap/task.hpp>
 #include <lib/rrc/encode.hpp>
 

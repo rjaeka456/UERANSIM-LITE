@@ -23,7 +23,7 @@ class CUAppTask : public NtsTask
     TaskBase *m_base;
     std::unique_ptr<Logger> m_logger;
 
-    CUStatusInfo m_statusInfo;
+//    CUStatusInfo m_statusInfo;
 
     friend class CUCmdHandler;
 

@@ -56,29 +56,6 @@ void CURrcTask::onLoop()
         //handleRlsSapMessage(dynamic_cast<NmCURlsToRrc &>(*msg));
         break;
     }
-    case NtsMessageType::CU_NGAP_TO_RRC: {
-        auto &w = dynamic_cast<NmCUNgapToRrc &>(*msg);
-        switch (w.present)
-        {
-        case NmCUNgapToRrc::RADIO_POWER_ON: {
-            m_isBarred = false;
-            triggerSysInfoBroadcast();
-            break;
-        }
-        case NmCUNgapToRrc::NAS_DELIVERY: {
-            handleDownlinkNasDelivery(w.ueId, w.pdu);
-            break;
-        }
-        case NmCUNgapToRrc::AN_RELEASE: {
-            releaseConnection(w.ueId);
-            break;
-        }
-        case NmCUNgapToRrc::PAGING:
-            handlePaging(w.uePagingTmsi, w.taiListForPaging);
-            break;
-        }
-        break;
-    }
     case NtsMessageType::TIMER_EXPIRED: {
         auto w = dynamic_cast<NmTimerExpired &>(*msg);
         if (w.timerId == TIMER_ID_SI_BROADCAST)
