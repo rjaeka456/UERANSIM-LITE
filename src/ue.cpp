@@ -247,6 +247,13 @@ static nr::ue::UeConfig *ReadConfigYaml()
         result->uacAcc.cls15 = yaml::GetBool(config["uacAcc"], "class15");
     }
 
+    yaml::AssertHasField(config, "position");
+    {
+        result->initPos.xpos = std::stod(yaml::GetString(config["position"], "x"));
+        result->initPos.ypos = std::stod(yaml::GetString(config["position"], "y"));
+        result->initPos.zpos = std::stod(yaml::GetString(config["position"], "z"));
+    }
+
     return result;
 }
 
@@ -372,6 +379,7 @@ static nr::ue::UeConfig *GetConfigByUe(int ueIndex)
     c->integrityMaxRate = g_refConfig->integrityMaxRate;
     c->uacAic = g_refConfig->uacAic;
     c->uacAcc = g_refConfig->uacAcc;
+    c->initPos = g_refConfig->initPos;
 
     if (c->supi.has_value())
         IncrementNumber(c->supi->value, ueIndex);

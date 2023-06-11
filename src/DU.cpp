@@ -53,7 +53,7 @@ static nr::DU::DUConfig *ReadConfigYaml()
 
     result->ignoreStreamIds = yaml::GetBool(config, "ignoreStreamIds");
     result->pagingDrx = EPagingDrx::V128;
-    result->name = "UERANSIM-CU-" + std::to_string(result->plmn.mcc) + "-" + std::to_string(result->plmn.mnc) + "-" +
+    result->name = "UERANSIM-DU-" + std::to_string(result->plmn.mcc) + "-" + std::to_string(result->plmn.mnc) + "-" +
                    std::to_string(result->getDUId()); // NOTE: Avoid using "/" dir separator character.
 
     for (auto &cuConfig : yaml::GetSequence(config, "cuConfigs"))
@@ -71,6 +71,13 @@ static nr::DU::DUConfig *ReadConfigYaml()
         if (yaml::HasField(nssai, "sd"))
             s.sd = octet3{yaml::GetInt32(nssai, "sd", 0, 0xFFFFFF)};
         result->nssai.slices.push_back(s);
+    }
+
+    yaml::AssertHasField(config, "position");
+    {
+        result->phyLocation.x = std::stod(yaml::GetString(config["position"], "x"));
+        result->phyLocation.y = std::stod(yaml::GetString(config["position"], "y"));
+        result->phyLocation.z = std::stod(yaml::GetString(config["position"], "z"));
     }
 
     return result;

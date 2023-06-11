@@ -60,7 +60,7 @@ struct RlsHeartBeat : RlsMessage
 
 struct RlsHeartBeatAck : RlsMessage
 {
-    int dbm{};
+    double dbm{};
 
     explicit RlsHeartBeatAck(uint64_t sti) : RlsMessage(EMessageType::HEARTBEAT_ACK, sti)
     {

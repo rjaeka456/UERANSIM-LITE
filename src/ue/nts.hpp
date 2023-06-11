@@ -60,60 +60,6 @@ struct NmUeTunToApp : NtsMessage
     }
 };
 
-struct NmUeRrcToNas : NtsMessage
-{
-    enum PR
-    {
-        NAS_NOTIFY,
-        NAS_DELIVERY,
-        RRC_CONNECTION_SETUP,
-        RRC_CONNECTION_RELEASE,
-        RRC_ESTABLISHMENT_FAILURE,
-        RADIO_LINK_FAILURE,
-        PAGING,
-        ACTIVE_CELL_CHANGED,
-        RRC_FALLBACK_INDICATION,
-    } present;
-
-    // NAS_DELIVERY
-    OctetString nasPdu;
-
-    // PAGING
-    std::vector<GutiMobileIdentity> pagingTmsi;
-
-    // ACTIVE_CELL_CHANGED
-    Tai previousTai;
-
-    explicit NmUeRrcToNas(PR present) : NtsMessage(NtsMessageType::UE_RRC_TO_NAS), present(present)
-    {
-    }
-};
-
-struct NmUeNasToRrc : NtsMessage
-{
-    enum PR
-    {
-        LOCAL_RELEASE_CONNECTION,
-        UPLINK_NAS_DELIVERY,
-        RRC_NOTIFY,
-        PERFORM_UAC,
-    } present;
-
-    // UPLINK_NAS_DELIVERY
-    uint32_t pduId{};
-    OctetString nasPdu;
-
-    // LOCAL_RELEASE_CONNECTION
-    bool treatBarred{};
-
-    // PERFORM_UAC
-    std::shared_ptr<LightSync<UacInput, UacOutput>> uacCtl{};
-
-    explicit NmUeNasToRrc(PR present) : NtsMessage(NtsMessageType::UE_NAS_TO_RRC), present(present)
-    {
-    }
-};
-
 struct NmUeRrcToRls : NtsMessage
 {
     enum PR
@@ -141,6 +87,7 @@ struct NmUeRrcToRrc : NtsMessage
     enum PR
     {
         TRIGGER_CYCLE,
+        SEND_RRC_SETUP_REQUEST,
     } present;
 
     explicit NmUeRrcToRrc(PR present) : NtsMessage(NtsMessageType::UE_RRC_TO_RRC), present(present)
@@ -166,93 +113,12 @@ struct NmUeRlsToRrc : NtsMessage
     OctetString pdu;
 
     // SIGNAL_CHANGED
-    int dbm{};
+    double dbm{};
 
     // RADIO_LINK_FAILURE
     rls::ERlfCause rlfCause{};
 
     explicit NmUeRlsToRrc(PR present) : NtsMessage(NtsMessageType::UE_RLS_TO_RRC), present(present)
-    {
-    }
-};
-
-struct NmUeNasToNas : NtsMessage
-{
-    enum PR
-    {
-        PERFORM_MM_CYCLE,
-        NAS_TIMER_EXPIRE,
-    } present;
-
-    // NAS_TIMER_EXPIRE
-    UeTimer *timer{};
-
-    explicit NmUeNasToNas(PR present) : NtsMessage(NtsMessageType::UE_NAS_TO_NAS), present(present)
-    {
-    }
-};
-
-struct NmUeNasToApp : NtsMessage
-{
-    enum PR
-    {
-        PERFORM_SWITCH_OFF,
-        DOWNLINK_DATA_DELIVERY
-    } present;
-
-    // DOWNLINK_DATA_DELIVERY
-    int psi{};
-    OctetString data;
-
-    explicit NmUeNasToApp(PR present) : NtsMessage(NtsMessageType::UE_NAS_TO_APP), present(present)
-    {
-    }
-};
-
-struct NmUeAppToNas : NtsMessage
-{
-    enum PR
-    {
-        UPLINK_DATA_DELIVERY,
-    } present;
-
-    // UPLINK_DATA_DELIVERY
-    int psi{};
-    OctetString data;
-
-    explicit NmUeAppToNas(PR present) : NtsMessage(NtsMessageType::UE_APP_TO_NAS), present(present)
-    {
-    }
-};
-
-struct NmUeNasToRls : NtsMessage
-{
-    enum PR
-    {
-        DATA_PDU_DELIVERY
-    } present;
-
-    // DATA_PDU_DELIVERY
-    int psi{};
-    OctetString pdu;
-
-    explicit NmUeNasToRls(PR present) : NtsMessage(NtsMessageType::UE_NAS_TO_RLS), present(present)
-    {
-    }
-};
-
-struct NmUeRlsToNas : NtsMessage
-{
-    enum PR
-    {
-        DATA_PDU_DELIVERY
-    } present;
-
-    // DATA_PDU_DELIVERY
-    int psi{};
-    OctetString pdu{};
-
-    explicit NmUeRlsToNas(PR present) : NtsMessage(NtsMessageType::UE_RLS_TO_NAS), present(present)
     {
     }
 };
@@ -283,7 +149,7 @@ struct NmUeRlsToRls : NtsMessage
     std::unique_ptr<rls::RlsMessage> msg{};
 
     // SIGNAL_CHANGED
-    int dbm{};
+    double dbm{};
 
     // UPLINK_DATA
     // DOWNLINK_DATA

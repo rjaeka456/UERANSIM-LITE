@@ -52,10 +52,6 @@ void UeRrcTask::onLoop()
 
     switch (msg->msgType)
     {
-    case NtsMessageType::UE_NAS_TO_RRC: {
-        handleNasSapMessage(dynamic_cast<NmUeNasToRrc &>(*msg));
-        break;
-    }
     case NtsMessageType::UE_RLS_TO_RRC: {
         handleRlsSapMessage(dynamic_cast<NmUeRlsToRrc &>(*msg));
         break;
@@ -66,6 +62,9 @@ void UeRrcTask::onLoop()
         {
         case NmUeRrcToRrc::TRIGGER_CYCLE:
             performCycle();
+            break;
+        case NmUeRrcToRrc::SEND_RRC_SETUP_REQUEST:
+            startConnectionEstablishment();
             break;
         }
         break;

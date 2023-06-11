@@ -30,8 +30,6 @@ void UeRrcTask::receiveMib(int cellId, const ASN_RRC_MIB &msg)
     desc.mib.isIntraFreqReselectAllowed = msg.intraFreqReselection == ASN_RRC_MIB__intraFreqReselection_allowed;
 
     desc.mib.hasMib = true;
-
-    updateAvailablePlmns();
 }
 
 void UeRrcTask::receiveSib1(int cellId, const ASN_RRC_SIB1 &msg)
@@ -63,8 +61,6 @@ void UeRrcTask::receiveSib1(int cellId, const ASN_RRC_SIB1 &msg)
     desc.sib1.aiBarringSet.ai1 = bits::BitAt<6>(barringBits);
 
     desc.sib1.hasSib1 = true;
-
-    updateAvailablePlmns();
 }
 
 } // namespace nr::ue

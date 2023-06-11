@@ -39,13 +39,12 @@ static ASN_RRC_UL_CCCH_Message *ConstructSetupRequest(ASN_RRC_InitialUE_Identity
     return pdu;
 }
 
-void UeRrcTask::startConnectionEstablishment(OctetString &&nasPdu)
+void UeRrcTask::startConnectionEstablishment()
 {
     /* Check the protocol state */
     if (m_state != ERrcState::RRC_IDLE)
     {
         m_logger->err("RRC establishment could not start, UE not in RRC-IDLE state");
-        handleEstablishmentFailure();
         return;
     }
 
@@ -54,7 +53,6 @@ void UeRrcTask::startConnectionEstablishment(OctetString &&nasPdu)
     if (activeCell == 0)
     {
         m_logger->err("RRC establishment could not start, no active cell");
-        handleEstablishmentFailure();
         return;
     }
 
@@ -75,9 +73,6 @@ void UeRrcTask::startConnectionEstablishment(OctetString &&nasPdu)
         m_initialId.present = ASN_RRC_InitialUE_Identity_PR_randomValue;
         asn::SetBitStringLong<39>(Random::Mixed(m_base->config->getNodeName()).nextL(), m_initialId.choice.randomValue);
     }
-
-    /* Set the Initial NAS PDU */
-    m_initialNasPdu = std::move(nasPdu);
 
     /* Send the message */
     m_logger->debug("Sending RRC Setup Request");
@@ -130,7 +125,6 @@ void UeRrcTask::receiveRrcSetup(int cellId, const ASN_RRC_RRCSetup &msg)
 
     m_logger->info("RRC connection established");
     switchState(ERrcState::RRC_CONNECTED);
-    m_base->nasTask->push(std::make_unique<NmUeRrcToNas>(NmUeRrcToNas::RRC_CONNECTION_SETUP));
 }
 
 void UeRrcTask::receiveRrcReject(int cellId, const ASN_RRC_RRCReject &msg)
@@ -139,20 +133,12 @@ void UeRrcTask::receiveRrcReject(int cellId, const ASN_RRC_RRCReject &msg)
         return;
 
     m_logger->err("RRC Reject received");
-
-    handleEstablishmentFailure();
 }
 
 void UeRrcTask::receiveRrcRelease(const ASN_RRC_RRCRelease &msg)
 {
     m_logger->debug("RRC Release received");
     m_state = ERrcState::RRC_IDLE;
-    m_base->nasTask->push(std::make_unique<NmUeRrcToNas>(NmUeRrcToNas::RRC_CONNECTION_RELEASE));
-}
-
-void UeRrcTask::handleEstablishmentFailure()
-{
-    m_base->nasTask->push(std::make_unique<NmUeRrcToNas>(NmUeRrcToNas::RRC_ESTABLISHMENT_FAILURE));
 }
 
 } // namespace nr::ue

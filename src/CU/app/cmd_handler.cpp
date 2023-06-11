@@ -32,7 +32,6 @@ void CUCmdHandler::pauseTasks()
     m_base->sctpServerTask->requestPause();
     m_base->f1apTask->requestPause();
     m_base->rrcTask->requestPause();
-
 }
 
 void CUCmdHandler::unpauseTasks()

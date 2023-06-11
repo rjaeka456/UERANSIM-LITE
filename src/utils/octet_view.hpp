@@ -113,6 +113,15 @@ class OctetView
         return (int64_t)read8();
     }
 
+    inline double read8D() const
+    {
+        double result = 0.0;
+        uint8_t tmp[sizeof(double)] = {read(), read(), read(), read(), read(), read(), read(), read()};
+        std::memcpy(&result, tmp, sizeof(double));
+
+        return result;
+    }
+
     inline size_t currentIndex() const
     {
         return index;

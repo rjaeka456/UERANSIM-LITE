@@ -182,7 +182,7 @@ void UeRrcTask::receiveRrcMessage(ASN_RRC_DL_DCCH_Message *msg)
     switch (c1->present)
     {
     case ASN_RRC_DL_DCCH_MessageType__c1_PR_dlInformationTransfer:
-        receiveDownlinkInformationTransfer(*c1->choice.dlInformationTransfer);
+        //receiveDownlinkInformationTransfer(*c1->choice.dlInformationTransfer);
         break;
     case ASN_RRC_DL_DCCH_MessageType__c1_PR_rrcRelease:
         receiveRrcRelease(*c1->choice.rrcRelease);
@@ -196,16 +196,6 @@ void UeRrcTask::receiveRrcMessage(ASN_RRC_PCCH_Message *msg)
 {
     if (msg->message.present != ASN_RRC_PCCH_MessageType_PR_c1)
         return;
-
-    auto &c1 = msg->message.choice.c1;
-    switch (c1->present)
-    {
-    case ASN_RRC_PCCH_MessageType__c1_PR_paging:
-        receivePaging(*c1->choice.paging);
-        break;
-    default:
-        break;
-    }
 }
 
 } // namespace nr::ue

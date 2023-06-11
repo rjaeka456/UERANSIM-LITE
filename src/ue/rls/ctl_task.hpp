@@ -46,7 +46,7 @@ class RlsControlTask : public NtsTask
 
   private:
     void handleRlsMessage(int cellId, rls::RlsMessage &msg);
-    void handleSignalChange(int cellId, int dbm);
+    void handleSignalChange(int cellId, double dbm);
     void handleUplinkRrcDelivery(int cellId, uint32_t pduId, rrc::RrcChannel channel, OctetString &&data);
     void handleUplinkDataDelivery(int psi, OctetString &&data);
     void onAckControlTimerExpired();

@@ -11,7 +11,6 @@
 #include <memory>
 #include <thread>
 #include <ue/nts.hpp>
-#include <ue/tun/task.hpp>
 #include <ue/types.hpp>
 #include <unordered_map>
 #include <utils/logger.hpp>
@@ -27,7 +26,6 @@ class UeAppTask : public NtsTask
     TaskBase *m_base;
     std::unique_ptr<Logger> m_logger;
 
-    std::array<TunTask *, 16> m_tunTasks{};
     ECmState m_cmState{};
 
     friend class UeCmdHandler;

@@ -79,9 +79,6 @@ class UeRrcTask : public NtsTask
     void onQuit() override;
 
   private:
-    /* Handlers */
-    void receivePaging(const ASN_RRC_Paging &msg);
-
     /* RRC Message Transmission and Receive */
     void handleDownlinkRrc(int cellId, rrc::RrcChannel channel, const OctetString &pdu);
     void sendRrcMessage(int cellId, ASN_RRC_UL_CCCH_Message *msg);
@@ -95,7 +92,6 @@ class UeRrcTask : public NtsTask
 
     /* Service Access Point */
     void handleRlsSapMessage(NmUeRlsToRrc &msg);
-    void handleNasSapMessage(NmUeNasToRrc &msg);
 
     /* State Management */
     void triggerCycle();
@@ -109,31 +105,21 @@ class UeRrcTask : public NtsTask
     bool lookForAcceptableCell(ActiveCellInfo &cellInfo, CellSelectionReport &report);
 
     /* Cell Management */
-    void handleCellSignalChange(int cellId, int dbm);
-    void notifyCellDetected(int cellId, int dbm);
+    void handleCellSignalChange(int cellId, double dbm);
+    void notifyCellDetected(int cellId, double dbm);
     void notifyCellLost(int cellId);
     bool hasSignalToCell(int cellId);
     bool isActiveCell(int cellId);
-    void updateAvailablePlmns();
 
     /* System Information and Broadcast */
     void receiveMib(int cellId, const ASN_RRC_MIB &msg);
     void receiveSib1(int cellId, const ASN_RRC_SIB1 &msg);
 
-    /* NAS Transport */
-    void deliverUplinkNas(uint32_t pduId, OctetString &&nasPdu);
-    void receiveDownlinkInformationTransfer(const ASN_RRC_DLInformationTransfer &msg);
-
     /* Connection Control */
-    void startConnectionEstablishment(OctetString &&nasPdu);
-    void handleEstablishmentFailure();
+    void startConnectionEstablishment();
     void receiveRrcSetup(int cellId, const ASN_RRC_RRCSetup &msg);
     void receiveRrcReject(int cellId, const ASN_RRC_RRCReject &msg);
     void receiveRrcRelease(const ASN_RRC_RRCRelease &msg);
-
-    /* Failures */
-    void declareRadioLinkFailure(rls::ERlfCause cause);
-    void handleRadioLinkFailure(rls::ERlfCause cause);
 
     /* Access Control */
     void performUac(std::shared_ptr<LightSync<UacInput, UacOutput>> &uacCtl);

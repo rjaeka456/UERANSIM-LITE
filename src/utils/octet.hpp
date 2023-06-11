@@ -14,6 +14,7 @@
 #include <cassert>
 #include <cstdint>
 #include <utility>
+#include <cstring>
 
 struct octet
 {
@@ -211,8 +212,24 @@ struct octet8
     {
     }
 
-    explicit octet8(double value) noexcept : value(value)
+    explicit octet8(double value) noexcept
     {
+        uint8_t octets[sizeof(double)];
+        std::memcpy(octets, &value, sizeof(double));
+
+        uint8_t octet0 = octets[0];
+        uint8_t octet1 = octets[1];
+        uint8_t octet2 = octets[2];
+        uint8_t octet3 = octets[3];
+        uint8_t octet4 = octets[4];
+        uint8_t octet5 = octets[5];
+        uint8_t octet6 = octets[6];
+        uint8_t octet7 = octets[7];
+
+        this->value = (static_cast<uint64_t>(octet0) << 56U) | (static_cast<uint64_t>(octet1) << 48U) |
+                ((static_cast<uint64_t>(octet2) << 40U)) | (static_cast<uint64_t>(octet3) << 32U) |
+                (static_cast<uint64_t>(octet4) << 24U) | (static_cast<uint64_t>(octet5) << 16U) |
+                (static_cast<uint64_t>(octet6) << 8U) | (static_cast<uint64_t>(octet7));
     }
 
     octet8(uint8_t octet0, uint8_t octet1, uint8_t octet2, uint8_t octet3, uint8_t octet4, uint8_t octet5,
@@ -233,6 +250,11 @@ struct octet8
     explicit constexpr operator int64_t() const
     {
         return static_cast<int64_t>(value);
+    }
+
+    explicit constexpr operator double() const
+    {
+        return static_cast<double>(value);
     }
 
     explicit constexpr operator uint64_t() const

@@ -39,7 +39,7 @@ class UserEquipment;
 
 struct UeCellDesc
 {
-    int dbm{};
+    double dbm{};
 
     struct
     {
@@ -111,6 +111,13 @@ struct UeConfig
     NetworkSlice defaultConfiguredNssai{};
     NetworkSlice configuredNssai{};
     std::optional<std::string> tunNamePrefix{};
+
+    struct
+    {
+        double xpos{};
+        double ypos{};
+        double zpos{};
+    } initPos;
 
     struct
     {
@@ -208,7 +215,6 @@ struct TaskBase
     UeSharedContext shCtx{};
 
     UeAppTask *appTask{};
-    NasTask *nasTask{};
     UeRrcTask *rrcTask{};
     UeRlsTask *rlsTask{};
 };

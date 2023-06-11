@@ -144,7 +144,7 @@ void RlsControlTask::handleRlsMessage(int cellId, rls::RlsMessage &msg)
     }
 }
 
-void RlsControlTask::handleSignalChange(int cellId, int dbm)
+void RlsControlTask::handleSignalChange(int cellId, double dbm)
 {
     auto w = std::make_unique<NmUeRlsToRls>(NmUeRlsToRls::SIGNAL_CHANGED);
     w->cellId = cellId;

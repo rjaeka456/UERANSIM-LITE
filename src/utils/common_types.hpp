@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <cmath>
 
 enum class EPagingDrx
 {
@@ -182,6 +183,24 @@ struct Vector3
 
     Vector3(double x, double y, double z) : x(x), y(y), z(z)
     {
+    }
+
+    Vector3 operator-(const Vector3& other) const {
+        return {x - other.x, y - other.y, z - other.z};
+    }
+
+    Vector3& operator+=(const Vector3& other) {
+        x += other.x;
+        y += other.y;
+        z += other.z;
+        return *this;
+    }
+
+    void normalize() {
+        double length = std::sqrt(x * x + y * y + z * z);
+        x /= length;
+        y /= length;
+        z /= length;
     }
 };
 

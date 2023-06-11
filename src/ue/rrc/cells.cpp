@@ -14,7 +14,7 @@
 namespace nr::ue
 {
 
-void UeRrcTask::handleCellSignalChange(int cellId, int dbm)
+void UeRrcTask::handleCellSignalChange(int cellId, double dbm)
 {
     bool considerLost = dbm < -120;
 
@@ -32,15 +32,13 @@ void UeRrcTask::handleCellSignalChange(int cellId, int dbm)
     }
 }
 
-void UeRrcTask::notifyCellDetected(int cellId, int dbm)
+void UeRrcTask::notifyCellDetected(int cellId, double dbm)
 {
     m_cellDesc[cellId] = {};
     m_cellDesc[cellId].dbm = dbm;
 
     m_logger->debug("New signal detected for cell[%d], total [%d] cells in coverage", cellId,
                     static_cast<int>(m_cellDesc.size()));
-
-    updateAvailablePlmns();
 }
 
 void UeRrcTask::notifyCellLost(int cellId)
@@ -64,19 +62,6 @@ void UeRrcTask::notifyCellLost(int cellId)
     m_logger->debug("Signal lost for cell[%d], total [%d] cells in coverage", cellId,
                     static_cast<int>(m_cellDesc.size()));
 
-    if (isActiveCell)
-    {
-        if (m_state != ERrcState::RRC_IDLE)
-            declareRadioLinkFailure(rls::ERlfCause::SIGNAL_LOST_TO_CONNECTED_CELL);
-        else
-        {
-            auto w = std::make_unique<NmUeRrcToNas>(NmUeRrcToNas::ACTIVE_CELL_CHANGED);
-            w->previousTai = Tai{lastActiveCell.plmn, lastActiveCell.tac};
-            m_base->nasTask->push(std::move(w));
-        }
-    }
-
-    updateAvailablePlmns();
 }
 
 bool UeRrcTask::hasSignalToCell(int cellId)
@@ -87,18 +72,6 @@ bool UeRrcTask::hasSignalToCell(int cellId)
 bool UeRrcTask::isActiveCell(int cellId)
 {
     return m_base->shCtx.currentCell.get<int>([](auto &value) { return value.cellId; }) == cellId;
-}
-
-void UeRrcTask::updateAvailablePlmns()
-{
-    m_base->shCtx.availablePlmns.mutate([this](std::unordered_set<Plmn> &value) {
-        value.clear();
-        for (auto &cellDesc : m_cellDesc)
-            if (cellDesc.second.sib1.hasSib1)
-                value.insert(cellDesc.second.sib1.plmn);
-    });
-
-    m_base->nasTask->push(std::make_unique<NmUeRrcToNas>(NmUeRrcToNas::NAS_NOTIFY));
 }
 
 } // namespace nr::ue

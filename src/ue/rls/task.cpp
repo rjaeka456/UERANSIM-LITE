@@ -56,13 +56,6 @@ void UeRlsTask::onLoop()
             m_base->rrcTask->push(std::move(m));
             break;
         }
-        case NmUeRlsToRls::DOWNLINK_DATA: {
-            auto m = std::make_unique<NmUeRlsToNas>(NmUeRlsToNas::DATA_PDU_DELIVERY);
-            m->psi = w.psi;
-            m->pdu = std::move(w.data);
-            m_base->nasTask->push(std::move(m));
-            break;
-        }
         case NmUeRlsToRls::DOWNLINK_RRC: {
             auto m = std::make_unique<NmUeRlsToRrc>(NmUeRlsToRrc::DOWNLINK_RRC_DELIVERY);
             m->cellId = w.cellId;
@@ -109,20 +102,6 @@ void UeRlsTask::onLoop()
         }
         case NmUeRrcToRls::RESET_STI: {
             m_shCtx->sti = Random::Mixed(m_base->config->getNodeName()).nextL();
-            break;
-        }
-        }
-        break;
-    }
-    case NtsMessageType::UE_NAS_TO_RLS: {
-        auto &w = dynamic_cast<NmUeNasToRls &>(*msg);
-        switch (w.present)
-        {
-        case NmUeNasToRls::DATA_PDU_DELIVERY: {
-            auto m = std::make_unique<NmUeRlsToRls>(NmUeRlsToRls::UPLINK_DATA);
-            m->psi = w.psi;
-            m->data = std::move(w.pdu);
-            m_ctlTask->push(std::move(m));
             break;
         }
         }

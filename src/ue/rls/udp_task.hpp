@@ -27,9 +27,28 @@ class RlsUdpTask : public NtsTask
     {
         InetAddress address;
         int64_t lastSeen{};
-        int dbm{};
+        double dbm{};
         int cellId{};
     };
+
+    class Position {
+      public:
+        double x;
+        double y;
+
+        Position() : x(0.0), y(0.0) {}
+        Position(double x, double y) : x(x), y(y) {}
+    };
+
+    class Rectangle {
+      public:
+        Position topLeft;
+        Position bottomRight;
+
+        Rectangle(Position topLeft, Position bottomRight)
+            : topLeft(topLeft), bottomRight(bottomRight) {}
+    };
+
 
   private:
     std::unique_ptr<Logger> m_logger;
@@ -40,8 +59,16 @@ class RlsUdpTask : public NtsTask
     std::unordered_map<uint64_t, CellInfo> m_cells;
     std::unordered_map<int, uint64_t> m_cellIdToSti;
     int64_t m_lastLoop;
-    Vector3 m_simPos;
+
     int m_cellIdCounter;
+
+    /* Mobility Variables */
+    Vector3 *m_simPos;
+    double m_speed;
+    double m_direction;
+    Rectangle bounds;
+
+
 
     friend class UeCmdHandler;
 
@@ -58,7 +85,11 @@ class RlsUdpTask : public NtsTask
     void sendRlsPdu(const InetAddress &addr, const rls::RlsMessage &msg);
     void receiveRlsPdu(const InetAddress &addr, std::unique_ptr<rls::RlsMessage> &&msg);
     void onSignalChangeOrLost(int cellId);
-    void heartbeatCycle(uint64_t time, const Vector3 &simPos);
+    void heartbeatCycle(uint64_t time, Vector3 *simPos);
+
+    /* Mobility Functions */
+    void walk();
+    void updateDirectionAndSpeed(double minSpeed, double maxSpeed, double minDirection, double maxDirection);
 
   public:
     void initialize(NtsTask *ctlTask);

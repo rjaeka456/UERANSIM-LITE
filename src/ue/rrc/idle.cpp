@@ -95,19 +95,22 @@ void UeRrcTask::performCellSelection()
     m_base->shCtx.currentCell.set(cellInfo);
 
     if (selectedCell != 0 && selectedCell != lastCell.cellId)
+    {
         m_logger->info("Selected cell plmn[%s] tac[%d] category[%s]", ToJson(cellInfo.plmn).str().c_str(), cellInfo.tac,
                        ToJson(cellInfo.category).str().c_str());
+
+        auto w = std::make_unique<NmUeRrcToRrc>(NmUeRrcToRrc::SEND_RRC_SETUP_REQUEST);
+        m_base->rrcTask->push(std::move(w));
+    }
 
     if (selectedCell != lastCell.cellId)
     {
         auto w1 = std::make_unique<NmUeRrcToRls>(NmUeRrcToRls::ASSIGN_CURRENT_CELL);
         w1->cellId = selectedCell;
         m_base->rlsTask->push(std::move(w1));
-
-        auto w2 = std::make_unique<NmUeRrcToNas>(NmUeRrcToNas::ACTIVE_CELL_CHANGED);
-        w2->previousTai = Tai{lastCell.plmn, lastCell.tac};
-        m_base->nasTask->push(std::move(w2));
     }
+
+
 }
 
 bool UeRrcTask::lookForSuitableCell(ActiveCellInfo &cellInfo, CellSelectionReport &report)
