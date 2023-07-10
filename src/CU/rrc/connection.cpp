@@ -45,9 +45,12 @@ void CURrcTask::receiveRrcSetupRequest(int duId, int gNB_DU_ID, string data)
 {
     auto msg = split(data, '|');
 
-    auto *ue = createUe(m_ueCtx.size());
+    auto *ue = createUe(ueIdentifier++);
 
-    ue->gNB_DU_ID = stoi(msg.at(1));
+    ue->gNB_DU_ID = gNB_DU_ID;
+    ue->GNB_DU_UE_ID = stoi(msg.at(1));
+
+    ue->state = ERrcState::RRC_IDLE;
 
     if (msg.at(2) == "TRUE")
     {
@@ -62,76 +65,37 @@ void CURrcTask::receiveRrcSetupRequest(int duId, int gNB_DU_ID, string data)
 
     ue->establishmentCause = stoll(msg.at(4));
 
+    ue->sti = stoll(msg.at(5));
+
     // Prepare RRC Setup
     m_logger->info("RRC Setup for UE[%d]", ue->ueId);
 
-    string pdu = "RRCSetup|" + to_string(ue->gNB_DU_ID) + "|" + to_string(getNextTid());
+    string pdu = "RRCSetup|" + to_string(ue->GNB_DU_UE_ID) + "|" + to_string(getNextTid());
 
-    auto w = std::make_unique<NmCURrcToF1ap>(NmCURrcToF1ap::SEND_MESSAGE2);
+    auto w = std::make_unique<NmCURrcToF1ap>(NmCURrcToF1ap::SEND_MESSAGE);
     w->duId = duId;
     w->rrcChannel = rrc::RrcChannel::DL_CCCH;
     w->data = pdu;
     m_base->f1apTask->push(std::move(w));
-
-    /*auto *pdu = asn::New<ASN_RRC_DL_CCCH_Message>();
-    pdu->message.present = ASN_RRC_DL_CCCH_MessageType_PR_c1;
-    pdu->message.choice.c1 = asn::NewFor(pdu->message.choice.c1);
-    pdu->message.choice.c1->present = ASN_RRC_DL_CCCH_MessageType__c1_PR_rrcSetup;
-    auto &rrcSetup = pdu->message.choice.c1->choice.rrcSetup = asn::New<ASN_RRC_RRCSetup>();
-    rrcSetup->rrc_TransactionIdentifier = getNextTid();
-    rrcSetup->criticalExtensions.present = ASN_RRC_RRCSetup__criticalExtensions_PR_rrcSetup;
-    auto &rrcSetupIEs = rrcSetup->criticalExtensions.choice.rrcSetup = asn::New<ASN_RRC_RRCSetup_IEs>();
-
-    ASN_RRC_CellGroupConfig masterCellGroup{};
-    masterCellGroup.cellGroupId = 0;
-
-    asn::SetOctetString(rrcSetupIEs->masterCellGroup,
-                        rrc::encode::EncodeS(asn_DEF_ASN_RRC_CellGroupConfig, &masterCellGroup));
-
-
-
-    sendRrcMessage(ueId, pdu);
-    asn::Free(asn_DEF_ASN_RRC_DL_CCCH_Message, pdu);*/
 }
 
-//void CURrcTask::receiveRrcSetupComplete(int ueId, const ASN_RRC_RRCSetupComplete &msg)
-//{
-//    auto *ue = findUe(ueId);
-//    if (!ue)
-//        return;
-//
-//    auto setupComplete = msg.criticalExtensions.choice.rrcSetupComplete;
-//
-//    if (msg.criticalExtensions.choice.rrcSetupComplete)
-//    {
-//        // Handle received 5G S-TMSI if any
-//        if (msg.criticalExtensions.choice.rrcSetupComplete->ng_5G_S_TMSI_Value)
-//        {
-//            ue->sTmsi = std::nullopt;
-//
-//            auto &sTmsiValue = msg.criticalExtensions.choice.rrcSetupComplete->ng_5G_S_TMSI_Value;
-//            if (sTmsiValue->present == ASN_RRC_RRCSetupComplete_IEs__ng_5G_S_TMSI_Value_PR_ng_5G_S_TMSI)
-//            {
-//                ue->sTmsi = GutiMobileIdentity::FromSTmsi(asn::GetBitStringLong<48>(sTmsiValue->choice.ng_5G_S_TMSI));
-//            }
-//            else if (sTmsiValue->present == ASN_RRC_RRCSetupComplete_IEs__ng_5G_S_TMSI_Value_PR_ng_5G_S_TMSI_Part2)
-//            {
-//                if (ue->isInitialIdSTmsi)
-//                {
-//                    int64_t part2 = asn::GetBitStringLong<9>(sTmsiValue->choice.ng_5G_S_TMSI_Part2);
-//                    ue->sTmsi = GutiMobileIdentity::FromSTmsi((part2 << 39) | (ue->initialId));
-//                }
-//            }
-//        }
-//    }
-//
-//    auto w = std::make_unique<NmCURrcToNgap>(NmCURrcToNgap::INITIAL_NAS_DELIVERY);
-//    w->ueId = ueId;
-//    w->pdu = asn::GetOctetString(setupComplete->dedicatedNAS_Message);
-//    w->rrcEstablishmentCause = ue->establishmentCause;
-//    w->sTmsi = ue->sTmsi;
-//
-//    m_base->ngapTask->push(std::move(w));
-//}
+void CURrcTask::receiveRrcSetupComplete(int duId, int gNB_DU_ID, string data)
+{
+    auto msg = split(data, '|');
+
+    auto DU_UE_ID = stoi(msg.at(1));
+    auto *ue = findUeByGNB_DU_UE_ID(gNB_DU_ID, DU_UE_ID);
+
+    ue->state = ERrcState::RRC_CONNECTED;
+
+    // Send Measurement Report
+    string pdu = "UECapabilityEnquiry|" + to_string(ue->GNB_DU_UE_ID) + "|" + to_string(getNextTid());
+
+    auto w = std::make_unique<NmCURrcToF1ap>(NmCURrcToF1ap::SEND_MESSAGE);
+    w->duId = duId;
+    w->rrcChannel = rrc::RrcChannel::DL_DCCH;
+    w->data = pdu;
+    m_base->f1apTask->push(std::move(w));
+}
 
 } // namespace nr::CU

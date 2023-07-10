@@ -23,4 +23,10 @@ enum class RrcChannel
     UL_DCCH,
 };
 
+enum class AssignCellCause
+{
+    RRC_SETUP_REQUEST,
+    RRC_RECONFIGURATION,
+};
+
 } // namespace nr::rrc

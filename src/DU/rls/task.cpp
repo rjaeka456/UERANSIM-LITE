@@ -63,6 +63,7 @@ void DURlsTask::onLoop()
         case NmDURlsToRls::UPLINK_RRC: {
             auto m = std::make_unique<NmDURlsToRrc>(NmDURlsToRrc::UPLINK_RRC);
             m->ueId = w.ueId;
+            m->sti = w.sti;
             m->rrcChannel = w.rrcChannel;
             m->data = std::move(w.data);
             m_base->rrcTask->push(std::move(m));

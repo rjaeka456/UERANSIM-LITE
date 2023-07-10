@@ -11,8 +11,61 @@
 #include <lib/rrc/encode.hpp>
 #include <ue/nas/task.hpp>
 
+#define hysteresis_parameter 3
+#define A2_Threshold -111
+#define A4_Threshold -142
+#define NeighCellOffset 1
+
 namespace nr::ue
 {
+
+void UeRrcTask::checkMeasurementreportTriggered()
+{
+    if ( m_state != ERrcState::RRC_CONNECTED)
+    {
+        return;
+    }
+
+    int servingCellId = m_base->shCtx.currentCell.get<int>([](auto &value) { return value.cellId; });
+    auto servingCell = m_cellDesc[servingCellId];
+
+    auto *neighCell = new UeCellDesc[m_cellDesc.size() - 1];
+
+    int i = 0;
+    for (auto &a : m_cellDesc)
+    {
+        if (a.first != servingCellId)
+            neighCell[i++] = a.second;
+    }
+
+    if (servingCell.dbm + hysteresis_parameter < A2_Threshold) // Event A2 Triggering
+    {
+        eventA2Trigger = true;
+    }
+
+    for (int j = 0; j < i; j++)
+    {
+        if (neighCell[j].dbm + NeighCellOffset - hysteresis_parameter > A4_Threshold) // Event A4 Triggering
+        {
+            eventA4Trigger = true;
+            break;
+        }
+    }
+
+    if (servingCell.dbm - hysteresis_parameter > A2_Threshold) // Event A2 Cancellation
+    {
+        eventA2Trigger = false;
+    }
+
+    for (int j = 0; j < i; j++)
+    {
+        if (neighCell[j].dbm + NeighCellOffset + hysteresis_parameter < A4_Threshold) // Event A4 Cancellation
+        {
+            eventA4Trigger = false;
+            break;
+        }
+    }
+}
 
 void UeRrcTask::handleCellSignalChange(int cellId, double dbm)
 {
@@ -28,7 +81,10 @@ void UeRrcTask::handleCellSignalChange(int cellId, double dbm)
         if (considerLost)
             notifyCellLost(cellId);
         else
+        {
             m_cellDesc[cellId].dbm = dbm;
+            checkMeasurementreportTriggered();
+        }
     }
 }
 

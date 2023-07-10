@@ -49,6 +49,8 @@ class CURrcTask : public NtsTask
     UacAiBarringSet m_aiBarringSet = {};
     bool m_intraFreqReselectAllowed = true;
 
+    int ueIdentifier = 0;
+
     friend class CUCmdHandler;
 
   public:
@@ -98,10 +100,17 @@ class CURrcTask : public NtsTask
     RrcUeContext *createUe(int id);
     RrcUeContext *tryFindUe(int id);
     RrcUeContext *findUe(int id);
+    RrcUeContext *findUeByGNB_DU_UE_ID(int gNB_DU_ID, int GNB_DU_UE_ID);
+    RrcUeContext *findUeBySti(int64_t sti);
 
     /* Connection Control */
     void receiveRrcSetupRequest(int duId, int gNB_DU_ID, std::string msg);
-    //void receiveRrcSetupComplete(int ueId, const ASN_RRC_RRCSetupComplete &msg);
+    void receiveRrcSetupComplete(int duId, int gNB_DU_ID, std::string msg);
+
+    /* Handover Control */
+    void receiveMeasurementReport(int duId, int gNB_DU_ID, std::string msg);
+    void TriggerInterDuHandover(int, int, long);
+    void receiveRrcReconfigurationComplete(int duId, int gNB_DU_ID, std::string data);
 };
 
 } // namespace nr::CU

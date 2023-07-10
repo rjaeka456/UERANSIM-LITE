@@ -20,6 +20,9 @@
 static constexpr const int TIMER_ID_MACHINE_CYCLE = 1;
 static constexpr const int TIMER_PERIOD_MACHINE_CYCLE = 2500;
 
+auto nextReportTime = std::chrono::high_resolution_clock::now();
+auto currentReportTime = std::chrono::high_resolution_clock::now();
+
 namespace nr::ue
 {
 
@@ -30,6 +33,10 @@ UeRrcTask::UeRrcTask(TaskBase *base) : m_base{base}, m_timers{}
     m_startedTime = utils::CurrentTimeMillis();
     m_state = ERrcState::RRC_IDLE;
     m_establishmentCause = ASN_RRC_EstablishmentCause_mt_Access;
+
+    eventA2Trigger = false;
+    eventA4Trigger = false;
+    measId  = 1;
 }
 
 void UeRrcTask::onStart()
@@ -49,6 +56,20 @@ void UeRrcTask::onLoop()
     auto msg = take();
     if (!msg)
         return;
+
+    if (m_state == ERrcState::RRC_CONNECTED)
+    {
+        if ((eventA2Trigger == true) or (eventA4Trigger == true))
+        {
+            currentReportTime = std::chrono::high_resolution_clock::now();
+            if (currentReportTime >= nextReportTime)
+            {
+                SendMeasurementReport();
+
+                nextReportTime = currentReportTime + std::chrono::milliseconds(480);
+            }
+        }
+    }
 
     switch (msg->msgType)
     {

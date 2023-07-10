@@ -91,8 +91,8 @@ static double GetLossLos(double distance2d, double distance3d, double hUt, doubl
 
     double distanceBp = GetBpDistance(m_frequency, hBs, hUt);
 
-    if (distance2d < 10.0 or distance2d > 10.0e3)
-        throw std::out_of_range("The 2D distance is outside the validity range, the pathloss value may not be accurate");
+//    if (distance2d < 10.0 or distance2d > 10.0e3)
+//        throw std::out_of_range("The 2D distance is outside the validity range, the pathloss value may not be accurate");
 
     double loss = 0;
 
@@ -208,6 +208,7 @@ void RlsUdpTask::receiveRlsPdu(const InetAddress &addr, std::unique_ptr<rls::Rls
         if (m_stiToUe.count(msg->sti))
         {
             int ueId = m_stiToUe[msg->sti];
+            m_ueMap[ueId].sti = msg->sti;
             m_ueMap[ueId].address = addr;
             m_ueMap[ueId].lastSeen = utils::CurrentTimeMillis();
         }
@@ -216,6 +217,7 @@ void RlsUdpTask::receiveRlsPdu(const InetAddress &addr, std::unique_ptr<rls::Rls
             int ueId = ++m_newIdCounter;
 
             m_stiToUe[msg->sti] = ueId;
+            m_ueMap[ueId].sti = msg->sti;
             m_ueMap[ueId].address = addr;
             m_ueMap[ueId].lastSeen = utils::CurrentTimeMillis();
 
@@ -239,6 +241,7 @@ void RlsUdpTask::receiveRlsPdu(const InetAddress &addr, std::unique_ptr<rls::Rls
 
     auto w = std::make_unique<NmDURlsToRls>(NmDURlsToRls::RECEIVE_RLS_MESSAGE);
     w->ueId = m_stiToUe[msg->sti];
+    w->sti = msg->sti;
     w->msg = std::move(msg);
     m_ctlTask->push(std::move(w));
 }

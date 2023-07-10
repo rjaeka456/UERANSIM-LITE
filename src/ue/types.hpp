@@ -276,6 +276,7 @@ enum class ERrcState
     RRC_IDLE,
     RRC_CONNECTED,
     RRC_INACTIVE,
+    RRC_CONNECTED_HANDOVER,
 };
 
 enum class ERrcLastSetupRequest

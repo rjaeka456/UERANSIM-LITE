@@ -13,7 +13,7 @@
 namespace nr::DU
 {
 
-void DURrcTask::handleUplinkRrc(int ueId, rrc::RrcChannel channel, const OctetString &rrcPdu)
+void DURrcTask::handleUplinkRrc(int ueId, int64_t sti, rrc::RrcChannel channel, const OctetString &rrcPdu)
 {
     switch (channel)
     {
@@ -31,7 +31,7 @@ void DURrcTask::handleUplinkRrc(int ueId, rrc::RrcChannel channel, const OctetSt
         if (pdu == nullptr)
             m_logger->err("RRC UL-CCCH PDU decoding failed.");
         else
-            receiveRrcMessage(ueId, pdu);
+            receiveRrcMessage(ueId, sti, pdu);
         asn::Free(asn_DEF_ASN_RRC_UL_CCCH_Message, pdu);
         break;
     }
@@ -49,7 +49,7 @@ void DURrcTask::handleUplinkRrc(int ueId, rrc::RrcChannel channel, const OctetSt
         if (pdu == nullptr)
             m_logger->err("RRC UL-DCCH PDU decoding failed.");
         else
-            receiveRrcMessage(ueId, pdu);
+            receiveRrcMessage(ueId, sti, pdu);
         asn::Free(asn_DEF_ASN_RRC_UL_DCCH_Message, pdu);
         break;
     }
@@ -146,7 +146,7 @@ void DURrcTask::receiveRrcMessage(int ueId, ASN_RRC_BCCH_BCH_Message *msg)
     // TODO
 }
 
-void DURrcTask::receiveRrcMessage(int ueId, ASN_RRC_UL_CCCH_Message *msg)
+void DURrcTask::receiveRrcMessage(int ueId, int64_t sti, ASN_RRC_UL_CCCH_Message *msg)
 {
     if (msg->message.present != ASN_RRC_UL_CCCH_MessageType_PR_c1)
         return;
@@ -157,7 +157,7 @@ void DURrcTask::receiveRrcMessage(int ueId, ASN_RRC_UL_CCCH_Message *msg)
     case ASN_RRC_UL_CCCH_MessageType__c1_PR_NOTHING:
         return;
     case ASN_RRC_UL_CCCH_MessageType__c1_PR_rrcSetupRequest:
-        receiveRrcSetupRequest(ueId, *c1->choice.rrcSetupRequest);
+        receiveRrcSetupRequest(ueId, sti, *c1->choice.rrcSetupRequest);
         m_logger->debug("RRC Setup Request Recevied From UE[%d]", ueId);
         break;
     case ASN_RRC_UL_CCCH_MessageType__c1_PR_rrcResumeRequest:
@@ -174,7 +174,7 @@ void DURrcTask::receiveRrcMessage(int ueId, ASN_RRC_UL_CCCH1_Message *msg)
     // TODO
 }
 
-void DURrcTask::receiveRrcMessage(int ueId, ASN_RRC_UL_DCCH_Message *msg)
+void DURrcTask::receiveRrcMessage(int ueId, int64_t sti, ASN_RRC_UL_DCCH_Message *msg)
 {
     if (msg->message.present != ASN_RRC_UL_DCCH_MessageType_PR_c1)
         return;
@@ -185,8 +185,10 @@ void DURrcTask::receiveRrcMessage(int ueId, ASN_RRC_UL_DCCH_Message *msg)
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_NOTHING:
         return;
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_measurementReport:
+        receiveMeasurementReport(ueId, *c1->choice.measurementReport);
         break; // TODO
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_rrcReconfigurationComplete:
+        receiveRrcReconfigurationComplete(ueId, sti, *c1->choice.rrcReconfigurationComplete);
         break; // TODO
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_rrcSetupComplete:
         receiveRrcSetupComplete(ueId, *c1->choice.rrcSetupComplete);

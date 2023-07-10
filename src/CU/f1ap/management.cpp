@@ -19,6 +19,24 @@ F1apDuContext* F1apTask::findDuContext(int ctxId)
     return ctx;
 }
 
+F1apDuContext* F1apTask::findDuContextByGNB_DU_ID(int gNB_DU_ID)
+{
+    F1apDuContext *ctx = nullptr;
+    for (auto& it: m_duCtx)
+    {
+        if (it.second->gNB_DU_ID == gNB_DU_ID)
+        {
+            ctx = it.second;
+            break;
+        }
+    }
+
+    if (ctx == nullptr)
+        m_logger->err("DU context not found with gNB_DU_ID: %d", gNB_DU_ID);
+
+    return ctx;
+}
+
 void F1apTask::createDuContext(int ctxId, int duId/*, int cellId */)
 {
     auto *ctx = new F1apDuContext();

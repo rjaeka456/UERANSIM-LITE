@@ -32,6 +32,10 @@ void UeRrcTask::handleRlsSapMessage(NmUeRlsToRrc &msg)
         m_logger->err("handleRadioLinkFailure");
         break;
     }
+    case NmUeRlsToRrc::RACH_ON_TARGET: {
+        sendRrcReconfigurationComplete();
+        break;
+    }
     }
 }
 

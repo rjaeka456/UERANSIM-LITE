@@ -32,4 +32,11 @@ RrcUeContext *DURrcTask::findUe(int id)
     return ue;
 }
 
+int DURrcTask::getNextTid()
+{
+    m_tidCounter++;
+    m_tidCounter %= 4;
+    return m_tidCounter;
+}
+
 }

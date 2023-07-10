@@ -4,6 +4,10 @@
 
 #include "task.hpp"
 
+#include <sstream>
+
+using namespace std;
+
 namespace nr::DU
 {
 
@@ -23,6 +27,35 @@ std::string F1apTask::decode(const UniqueBuffer &buffer)
     delete tmp;
 
     return result;
+}
+
+string F1apTask::Merge(vector<string> vec)
+{
+    string result = "";
+
+    for (string &s : vec)
+    {
+        result = result + s + "|";
+    }
+
+    result = result.substr(0, result.length() - 1);
+
+    return result;
+}
+
+
+vector<string> F1apTask::split(string input, char delimiter)
+{
+    vector<string> answer;
+    stringstream ss(input);
+    string temp;
+
+    while (getline(ss, temp, delimiter))
+    {
+        answer.push_back(temp);
+    }
+
+    return answer;
 }
 
 

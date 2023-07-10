@@ -30,6 +30,13 @@ imeiSv: '4370816125816151'
 gnbSearchList:
   - 127.0.0.1
   - 127.0.0.2
+  - 127.0.0.3
+  - 127.0.0.4
+  - 127.0.0.5
+  - 127.0.0.6
+  - 127.0.0.7
+  - 127.0.0.8
+  - 127.0.0.9
 
 # UAC Access Identities Configuration
 uacAic:
@@ -80,6 +87,6 @@ integrityMaxRate:
 
 # Initial Position for UE's mobility
 position:
-  x: '500.111111'
-  y: '500.111111'
+  x: '750.111111'
+  y: '750.111111'
   z: '1.312345'

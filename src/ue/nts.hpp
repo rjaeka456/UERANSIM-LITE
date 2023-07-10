@@ -77,6 +77,8 @@ struct NmUeRrcToRls : NtsMessage
     uint32_t pduId{};
     OctetString pdu{};
 
+    rrc::AssignCellCause cause{};
+
     explicit NmUeRrcToRls(PR present) : NtsMessage(NtsMessageType::UE_RRC_TO_RLS), present(present)
     {
     }
@@ -101,7 +103,8 @@ struct NmUeRlsToRrc : NtsMessage
     {
         DOWNLINK_RRC_DELIVERY,
         SIGNAL_CHANGED,
-        RADIO_LINK_FAILURE
+        RADIO_LINK_FAILURE,
+        RACH_ON_TARGET,
     } present;
 
     // DOWNLINK_RRC_DELIVERY
@@ -136,6 +139,7 @@ struct NmUeRlsToRls : NtsMessage
         RADIO_LINK_FAILURE,
         TRANSMISSION_FAILURE,
         ASSIGN_CURRENT_CELL,
+        RACH_ON_TARGET,
     } present;
 
     // RECEIVE_RLS_MESSAGE
@@ -173,6 +177,8 @@ struct NmUeRlsToRls : NtsMessage
 
     // TRANSMISSION_FAILURE
     std::vector<rls::PduInfo> pduList;
+
+    rrc::AssignCellCause cause{};
 
     explicit NmUeRlsToRls(PR present) : NtsMessage(NtsMessageType::UE_RLS_TO_RLS), present(present)
     {

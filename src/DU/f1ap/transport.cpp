@@ -7,27 +7,10 @@
 #include <DU/sctp/task.hpp>
 #include <DU/nts.hpp>
 
-#include <sstream>
-
 using namespace std;
 
 namespace nr::DU
 {
-
-vector<string> F1apTask::split(string input, char delimiter)
-{
-    vector<string> answer;
-    stringstream ss(input);
-    string temp;
-
-    while (getline(ss, temp, delimiter))
-    {
-        answer.push_back(temp);
-    }
-
-    return answer;
-}
-
 
 void F1apTask::handleSctpMessage(uint16_t stream, const UniqueBuffer &buffer)
 {
@@ -52,6 +35,21 @@ void F1apTask::handleSctpMessage(uint16_t stream, const UniqueBuffer &buffer)
     {
         m_logger->debug("DL Rrc Message Transfer received From CU");
         receiveDLRrcMessageTransfer(msg);
+    }
+    else if (msg.front() == "UEContextSetupRequest")
+    {
+        m_logger->debug("UEContextSetupRequest received From CU");
+        receiveUEContextSetupRequest(msg);
+    }
+    else if (msg.front() == "UEContextModificationRequest")
+    {
+        m_logger->debug("UEContextModificationRequest received From CU");
+        receiveUEContextModificationRequest(msg);
+    }
+    else if (msg.front() == "UEContextReleaseCommand")
+    {
+        m_logger->debug("UEContextReleaseCommand received From CU");
+        receiveUEContextReleaseCommand(msg);
     }
 }
 

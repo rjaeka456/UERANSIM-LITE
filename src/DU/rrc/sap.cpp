@@ -20,7 +20,7 @@ void DURrcTask::handleRlsSapMessage(NmDURlsToRrc &msg)
         break;
     }
     case NmDURlsToRrc::UPLINK_RRC: {
-        handleUplinkRrc(msg.ueId, msg.rrcChannel, msg.data);
+        handleUplinkRrc(msg.ueId, msg.sti, msg.rrcChannel, msg.data);
         break;
     }
     }

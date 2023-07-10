@@ -19,6 +19,19 @@
 #include <asn/rrc/ASN_RRC_RRCSetupComplete.h>
 #include <asn/rrc/ASN_RRC_RRCSetupRequest-IEs.h>
 #include <asn/rrc/ASN_RRC_RRCSetupRequest.h>
+#include <asn/rrc/ASN_RRC_UECapabilityEnquiry.h>
+#include <asn/rrc/ASN_RRC_UECapabilityEnquiry-IEs.h>
+#include <asn/rrc/ASN_RRC_UECapabilityInformation-IEs.h>
+#include <asn/rrc/ASN_RRC_UECapabilityInformation.h>
+#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-Container.h>
+#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-ContainerList.h>
+#include <asn/rrc/ASN_RRC_UE-NR-Capability.h>
+#include <asn/rrc/ASN_RRC_BandNR.h>
+#include <asn/rrc/ASN_RRC_FreqBandList.h>
+#include <asn/rrc/ASN_RRC_FreqBandInformationNR.h>
+#include <asn/rrc/ASN_RRC_FreqBandInformation.h>
+#include <asn/rrc/ASN_RRC_AggregatedBandwidth.h>
+
 
 namespace nr::ue
 {
@@ -139,6 +152,37 @@ void UeRrcTask::receiveRrcRelease(const ASN_RRC_RRCRelease &msg)
 {
     m_logger->debug("RRC Release received");
     m_state = ERrcState::RRC_IDLE;
+}
+
+void UeRrcTask::receiveRrcUECapabilityEnquiry(const ASN_RRC_UECapabilityEnquiry &msg)
+{
+    m_logger->debug("UECapabilityEnquiry received");
+
+    m_logger->info("Sending UE Capability Information");
+    auto *pdu = asn::New<ASN_RRC_UL_DCCH_Message>();
+    pdu->message.present = ASN_RRC_UL_DCCH_MessageType_PR_c1;
+    pdu->message.choice.c1 = asn::NewFor(pdu->message.choice.c1);
+    pdu->message.choice.c1->present = ASN_RRC_UL_DCCH_MessageType__c1_PR_ueCapabilityInformation;
+
+    auto &capabilityInformation = pdu->message.choice.c1->choice.ueCapabilityInformation = asn::New<ASN_RRC_UECapabilityInformation>();
+    capabilityInformation->rrc_TransactionIdentifier = msg.rrc_TransactionIdentifier;
+    capabilityInformation->criticalExtensions.present = ASN_RRC_UECapabilityInformation__criticalExtensions_PR_ueCapabilityInformation;
+
+    auto &ies = capabilityInformation->criticalExtensions.choice.ueCapabilityInformation = asn::New<ASN_RRC_UECapabilityInformation_IEs>();
+    ies->ue_CapabilityRAT_ContainerList = asn::New<ASN_RRC_UE_CapabilityRAT_ContainerList>();
+
+    OctetString octetString{};
+    octetString.appendUtf8("15");
+
+    auto *ue_CapabilityRAT_Container = asn::New<ASN_RRC_UE_CapabilityRAT_Container>();
+    ue_CapabilityRAT_Container->rat_Type = ASN_RRC_RAT_Type_nr;
+    asn::SetOctetString(ue_CapabilityRAT_Container->ue_CapabilityRAT_Container, octetString);
+
+    asn::SequenceAdd(*ies->ue_CapabilityRAT_ContainerList, ue_CapabilityRAT_Container);
+    //asn::SetOctetString(ies->dedicatedNAS_Message, m_initialNasPdu);
+
+    sendRrcMessage(pdu);
+    asn::Free(asn_DEF_ASN_RRC_UL_DCCH_Message, pdu);
 }
 
 } // namespace nr::ue

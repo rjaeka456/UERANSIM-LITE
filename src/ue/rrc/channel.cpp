@@ -187,6 +187,10 @@ void UeRrcTask::receiveRrcMessage(ASN_RRC_DL_DCCH_Message *msg)
     case ASN_RRC_DL_DCCH_MessageType__c1_PR_rrcRelease:
         receiveRrcRelease(*c1->choice.rrcRelease);
         break;
+    case ASN_RRC_DL_DCCH_MessageType__c1_PR_rrcReconfiguration:
+        receiveRrcReconfiguration(*c1->choice.rrcReconfiguration);
+    case ASN_RRC_DL_DCCH_MessageType__c1_PR_ueCapabilityEnquiry:
+        receiveRrcUECapabilityEnquiry(*c1->choice.ueCapabilityEnquiry);
     default:
         break;
     }

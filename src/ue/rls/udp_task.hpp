@@ -68,8 +68,6 @@ class RlsUdpTask : public NtsTask
     double m_direction;
     Rectangle bounds;
 
-
-
     friend class UeCmdHandler;
 
   public:

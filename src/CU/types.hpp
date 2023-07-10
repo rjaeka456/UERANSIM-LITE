@@ -5,6 +5,7 @@
 #pragma once
 
 #include <set>
+#include <Eigen/Dense>
 
 #include <lib/app/monitor.hpp>
 #include <lib/asn/utils.hpp>
@@ -36,19 +37,32 @@ struct SctpAssociation
 struct F1apDuContext
 {
     int ctxId{};
-    int gNB_DU_ID{};
+    int32_t gNB_DU_ID{};
 //    int cellID;
+};
+
+enum class ERrcState
+{
+    RRC_IDLE,
+    RRC_CONNECTED,
+    RRC_CONNECTED_HANDOVER,
+    RRC_INACTIVE,
 };
 
 struct RrcUeContext
 {
     const int ueId{};
 
-    int gNB_DU_ID{};
+    int32_t gNB_DU_ID{};
+    int GNB_DU_UE_ID{};
     int64_t initialId = -1; // 39-bit value, or -1
     bool isInitialIdSTmsi{}; // TMSI-part-1 or a random value
     int64_t establishmentCause{};
     std::optional<GutiMobileIdentity> sTmsi{};
+    ERrcState state{};
+
+    int64_t sti;
+
 
     explicit RrcUeContext(const int ueId) : ueId(ueId)
     {

@@ -51,6 +51,7 @@ class RlsControlTask : public NtsTask
     void handleUplinkDataDelivery(int psi, OctetString &&data);
     void onAckControlTimerExpired();
     void onAckSendTimerExpired();
+    void rachOnTarget();
 };
 
 } // namespace nr::ue

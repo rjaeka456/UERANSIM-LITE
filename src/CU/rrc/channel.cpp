@@ -28,7 +28,21 @@ void CURrcTask::handleUplinkRrcCCCH(int duId, int gNB_DU_ID, std::string data)
 
 void CURrcTask::handleUplinkRrcDCCH(int duId, int gNB_DU_ID, std::string data)
 {
-    //if ()
+    auto msg = split(data, '|');
+    std::string msgType = msg.front();
+
+    if (msgType == "RRCSetupComplete")
+    {
+        receiveRrcSetupComplete(duId, gNB_DU_ID, data);
+    }
+    else if (msgType == "MeasurementReport")
+    {
+        receiveMeasurementReport(duId, gNB_DU_ID, data);
+    }
+    else if (msgType == "RRCReconfigurationComplete")
+    {
+        receiveRrcReconfigurationComplete(duId, gNB_DU_ID, data);
+    }
 }
 
 void CURrcTask::handleUplinkRrc(int ueId, rrc::RrcChannel channel, const OctetString &rrcPdu)

@@ -42,6 +42,7 @@ class F1apTask : public NtsTask
     void deleteDuContext(int duId);
     std::vector<std::string> split(std::string input, char delimiter);
     std::string Merge(std::vector<std::string> vec);
+    F1apDuContext* findDuContextByGNB_DU_ID(int gNB_DU_ID);
 
     /* Interface management */
     void handleAssociationSetup(int amfId, int inCount, int outCount);
@@ -49,6 +50,10 @@ class F1apTask : public NtsTask
     void receiveF1SetupRequest(int duId, int gNB_DU_ID /*, int cellId */);
     void sendF1SetupResponse(int duId);
     void sendDLRrcMessageTransfer(int duId, rrc::RrcChannel rrcChannel, std::string msg);
+    void sendUEContextSetupRequest(int duId, int ueId, int GNB_DU_UE_ID,long sourcePCI, long targetPCI);
+    void receiveUEContextSetupResponse(int duId, std::vector<std::string> msg);
+    void sendUEContextReleaseCommand(int duId, int GNB_DU_UE_ID);
+    void receiveUEContextReleaseComplete(int duId);
 
     /* Message transport */
     void handleSctpMessage(int duId, uint16_t stream, const UniqueBuffer &buffer);

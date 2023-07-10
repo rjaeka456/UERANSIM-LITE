@@ -48,6 +48,14 @@ void F1apTask::onLoop()
             handleULRrcTransfer(w.rrcChannel, w.buffer);
             break;
         }
+        case NmDURrcToF1ap::UE_CONTEXT_SETUP_RESPONSE: {
+            // sendUEContextSetupResponse(w.msg);
+            break;
+        }
+        case NmDURrcToF1ap::UE_CONTEXT_RELEASE_COMPLETE: {
+            sendUEContextReleaseComplete(w.ueId);
+            break;
+        }
         }
         break;
     }

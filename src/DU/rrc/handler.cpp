@@ -7,17 +7,18 @@
 #include <lib/rrc/encode.hpp>
 
 #include <asn/rrc/ASN_RRC_DL-CCCH-Message.h>
-#include <asn/rrc/ASN_RRC_DL-DCCH-Message.h>
 #include <asn/rrc/ASN_RRC_RRCSetup-IEs.h>
 #include <asn/rrc/ASN_RRC_RRCSetup.h>
 #include <asn/rrc/ASN_RRC_CellGroupConfig.h>
+#include <asn/rrc/ASN_RRC_UECapabilityEnquiry.h>
+#include <asn/rrc/ASN_RRC_UECapabilityEnquiry-IEs.h>
+#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-RequestList.h>
+#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-Request.h>
 
 using namespace std;
 
 namespace nr::DU
 {
-
-
 
 void DURrcTask::releaseConnection(int ueId)
 {
@@ -44,11 +45,11 @@ void DURrcTask::handleDownlinkRrcTransfer(vector<string> msg)
 {
     if (msg.at(1) == "DL_CCCH")
     {
-        handleDLCCCHMessage(vector<string>(msg.begin() + 2, msg.begin() + msg.size()));
+        handleDLCCCHMessage(vector<string>(msg.begin() + 2, msg.end()));
     }
     else if (msg.at(1) == "DL_DCCH")
     {
-        handleDLDCCHMessage(vector<string>(msg.begin() + 2, msg.begin() + msg.size() + 1));
+        handleDLDCCHMessage(vector<string>(msg.begin() + 2, msg.end()));
     }
 }
 
@@ -67,7 +68,16 @@ void DURrcTask::handleDLCCCHMessage(vector<string> msg)
 }
 void DURrcTask::handleDLDCCHMessage(vector<string> msg)
 {
+    auto ue = findUe(stoi(msg.at(1)));
+    if (ue == nullptr)
+    {
+        return;
+    }
 
+    if (msg.front() == "UECapabilityEnquiry")
+    {
+        sendUECapabilityEnquiry(msg);
+    }
 }
 
 void DURrcTask::sendRRCSetup(std::vector<std::string> msg)
@@ -88,12 +98,41 @@ void DURrcTask::sendRRCSetup(std::vector<std::string> msg)
     asn::SetOctetString(rrcSetupIEs->masterCellGroup,
                         rrc::encode::EncodeS(asn_DEF_ASN_RRC_CellGroupConfig, &masterCellGroup));
 
-
-
     sendRrcMessage(ueId, pdu);
     asn::Free(asn_DEF_ASN_RRC_DL_CCCH_Message, pdu);
 }
 
+void DURrcTask::sendUECapabilityEnquiry(std::vector<std::string> msg)
+{
+    int ueId = stoi(msg.at(1));
+
+    auto ue = findUe(ueId);
+    if (ue == nullptr)
+    {
+        m_logger->err("sendUECapabilityEnquiry Error: \"UE[%d] does not exist\"", ueId);
+        return;
+    }
+
+    auto *pdu = asn::New<ASN_RRC_DL_DCCH_Message>();
+    pdu->message.present = ASN_RRC_DL_DCCH_MessageType_PR_c1;
+    pdu->message.choice.c1 = asn::NewFor(pdu->message.choice.c1);
+    pdu->message.choice.c1->present = ASN_RRC_DL_DCCH_MessageType__c1_PR_ueCapabilityEnquiry;
+    auto &ueCapability = pdu->message.choice.c1->choice.ueCapabilityEnquiry = asn::New<ASN_RRC_UECapabilityEnquiry>();
+    ueCapability->rrc_TransactionIdentifier = stoi(msg.at(2));
+    ueCapability->criticalExtensions.present = ASN_RRC_UECapabilityEnquiry__criticalExtensions_PR_ueCapabilityEnquiry;
+    auto &ueCapabilityIEs = ueCapability->criticalExtensions.choice.ueCapabilityEnquiry = asn::New<ASN_RRC_UECapabilityEnquiry_IEs>();
+
+    ASN_RRC_UE_CapabilityRAT_Request ueCapabilityRatRequest{};
+    ueCapabilityRatRequest.rat_Type = ASN_RRC_RAT_Type_nr;
+
+    asn::SequenceAdd(ueCapabilityIEs->ue_CapabilityRAT_RequestList, &ueCapabilityRatRequest);
+
+
+    sendRrcMessage(ueId, pdu);
+    //asn::Free(asn_DEF_ASN_RRC_DL_DCCH_Message, pdu);
+
+    m_logger->debug("Sending UE Capability Enquiry To UE[%d]", ue->ueId);
+}
 
 
 

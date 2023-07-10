@@ -63,6 +63,18 @@ void F1apTask::handleSctpMessage(int duId, uint16_t stream, const UniqueBuffer &
         receiveF1SetupRequest(duId, stoi(msg.at(1)));
         m_logger->debug("F1 Setup Request received From %s", msg.at(1).c_str());
     }
+    else if (msg.front() == "UEContextSetupResponse")
+    {
+        receiveUEContextSetupResponse(duId, msg);
+    }
+    else if (msg.front() == "UEContextModificationResponse")
+    {
+        m_logger->info("UEContextModificationResponse received From DU[%d]", duId);
+    }
+    else if (msg.front() == "UEContextReleaseComplete")
+    {
+        receiveUEContextReleaseComplete(duId);
+    }
     else if (msg.front() == "ULRrcMessageTransfer") //RRC Message
     {
         auto *du = findDuContext(duId);
@@ -71,12 +83,12 @@ void F1apTask::handleSctpMessage(int duId, uint16_t stream, const UniqueBuffer &
 
         if (msg.at(1) == "UL_CCCH")
         {
-            string rrcMsg = Merge(vector<string>(msg.begin() + 2, msg.begin() + msg.size() + 1));
+            string rrcMsg = Merge(vector<string>(msg.begin() + 2, msg.end()));
             receiveRrc_UL_CCCH_Message(duId, rrcMsg);
         }
         else if (msg.at(1) == "UL_DCCH")
         {
-            string rrcMsg = Merge(vector<string>(msg.begin() + 2, msg.begin() + msg.size() + 1));
+            string rrcMsg = Merge(vector<string>(msg.begin() + 2, msg.end()));
             receiveRrc_UL_DCCH_Message(duId, rrcMsg);
         }
         else

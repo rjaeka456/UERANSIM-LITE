@@ -74,6 +74,11 @@ void UeRlsTask::onLoop()
             m_logger->debug("transmission failure [%d]", w.pduList.size());
             break;
         }
+        case NmUeRlsToRls::RACH_ON_TARGET: {
+            auto m = std::make_unique<NmUeRlsToRrc>(NmUeRlsToRrc::RACH_ON_TARGET);
+            m_base->rrcTask->push(std::move(m));
+            break;
+        }
         default: {
             m_logger->unhandledNts(*msg);
             break;
@@ -88,6 +93,7 @@ void UeRlsTask::onLoop()
         case NmUeRrcToRls::ASSIGN_CURRENT_CELL: {
             auto m = std::make_unique<NmUeRlsToRls>(NmUeRlsToRls::ASSIGN_CURRENT_CELL);
             m->cellId = w.cellId;
+            m->cause = w.cause;
             m_ctlTask->push(std::move(m));
             break;
         }

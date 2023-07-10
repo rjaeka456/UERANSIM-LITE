@@ -57,10 +57,18 @@ void DURrcTask::onLoop()
             handleDownlinkRrcTransfer(w.buffer);
             break;
         }
-//        case NmDUF1apToRrc::NAS_DELIVERY: {
-//            handleDownlinkNasDelivery(w.ueId, w.pdu);
-//            break;
-//        }
+        case NmDUF1apToRrc::UE_CONTEXT_SETUP_REQUEST: {
+            handleUEContextSetupRequest(w.buffer);
+            break;
+        }
+        case NmDUF1apToRrc::UE_CONTEXT_MODIFICATION_REQUEST: {
+            sendRRCReconfiguration(w.ueId, w.targetPCI);
+            break;
+        }
+        case NmDUF1apToRrc::UE_CONTEXT_RELEASE_COMMAND: {
+            sendUEContextReleaseComplete(w.ueId);
+            break;
+        }
         case NmDUF1apToRrc::AN_RELEASE: {
             releaseConnection(w.ueId);
             break;

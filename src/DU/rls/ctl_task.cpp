@@ -56,7 +56,7 @@ void RlsControlTask::onLoop()
             handleSignalLost(w.ueId);
             break;
         case NmDURlsToRls::RECEIVE_RLS_MESSAGE:
-            handleRlsMessage(w.ueId, *w.msg);
+            handleRlsMessage(w.ueId, w.sti, *w.msg);
             break;
         case NmDURlsToRls::DOWNLINK_DATA:
             handleDownlinkDataDelivery(w.ueId, w.psi, std::move(w.data));
@@ -108,7 +108,7 @@ void RlsControlTask::handleSignalLost(int ueId)
     m_mainTask->push(std::move(w));
 }
 
-void RlsControlTask::handleRlsMessage(int ueId, rls::RlsMessage &msg)
+void RlsControlTask::handleRlsMessage(int ueId, int64_t sti, rls::RlsMessage &msg)
 {
     if (msg.msgType == rls::EMessageType::PDU_TRANSMISSION_ACK)
     {
@@ -134,6 +134,7 @@ void RlsControlTask::handleRlsMessage(int ueId, rls::RlsMessage &msg)
         {
             auto w = std::make_unique<NmDURlsToRls>(NmDURlsToRls::UPLINK_RRC);
             w->ueId = ueId;
+            w->sti = sti;
             w->rrcChannel = static_cast<rrc::RrcChannel>(m.payload);
             w->data = std::move(m.pdu);
             m_mainTask->push(std::move(w));

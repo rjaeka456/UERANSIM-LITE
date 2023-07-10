@@ -33,8 +33,14 @@ void F1apTask::onLoop()
         auto &w = dynamic_cast<NmCURrcToF1ap &>(*msg);
         switch (w.present)
         {
-        case NmCURrcToF1ap::SEND_MESSAGE2:
+        case NmCURrcToF1ap::SEND_MESSAGE:
             sendDLRrcMessageTransfer(w.duId, w.rrcChannel, w.data);
+            break;
+        case NmCURrcToF1ap::UE_CONTEXT_SETUP_REQUEST:
+            sendUEContextSetupRequest(w.duId, w.ueId, w.GNB_DU_UE_ID, w.sourcePCI, w.targetPCI);
+            break;
+        case NmCURrcToF1ap::UE_CONTEXT_RELEASE_COMMAND:
+            sendUEContextReleaseCommand(w.duId, w.GNB_DU_UE_ID);
             break;
         }
     }

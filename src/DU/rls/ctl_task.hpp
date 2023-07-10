@@ -38,7 +38,7 @@ class RlsControlTask : public NtsTask
   private:
     void handleSignalDetected(int ueId);
     void handleSignalLost(int ueId);
-    void handleRlsMessage(int ueId, rls::RlsMessage &msg);
+    void handleRlsMessage(int ueId, int64_t sti, rls::RlsMessage &msg);
     void handleDownlinkRrcDelivery(int ueId, uint32_t pduId, rrc::RrcChannel channel, OctetString &&data);
     void handleDownlinkDataDelivery(int ueId, int psi, OctetString &&data);
     void onAckControlTimerExpired();

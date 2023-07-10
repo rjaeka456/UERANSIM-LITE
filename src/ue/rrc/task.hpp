@@ -40,6 +40,8 @@ extern "C"
     struct ASN_RRC_Paging;
     struct ASN_RRC_MIB;
     struct ASN_RRC_SIB1;
+    struct ASN_RRC_RRCReconfiguration;
+    struct ASN_RRC_UECapabilityEnquiry;
 }
 
 namespace nr::ue
@@ -66,6 +68,13 @@ class UeRrcTask : public NtsTask
     int m_establishmentCause{};
     ASN_RRC_InitialUE_Identity_t m_initialId{};
     OctetString m_initialNasPdu{};
+
+    /* Handover Procedure related */
+    bool eventA2Trigger;
+    bool eventA4Trigger;
+    long measId;
+
+
 
     friend class UeCmdHandler;
 
@@ -104,6 +113,13 @@ class UeRrcTask : public NtsTask
     bool lookForSuitableCell(ActiveCellInfo &cellInfo, CellSelectionReport &report);
     bool lookForAcceptableCell(ActiveCellInfo &cellInfo, CellSelectionReport &report);
 
+    /* Connection Mode Operations */
+    void checkMeasurementreportTriggered();
+    void SendMeasurementReport();
+    long getMeasId();
+    void receiveRrcReconfiguration(const ASN_RRC_RRCReconfiguration &msg);
+    void sendRrcReconfigurationComplete();
+
     /* Cell Management */
     void handleCellSignalChange(int cellId, double dbm);
     void notifyCellDetected(int cellId, double dbm);
@@ -120,6 +136,7 @@ class UeRrcTask : public NtsTask
     void receiveRrcSetup(int cellId, const ASN_RRC_RRCSetup &msg);
     void receiveRrcReject(int cellId, const ASN_RRC_RRCReject &msg);
     void receiveRrcRelease(const ASN_RRC_RRCRelease &msg);
+    void receiveRrcUECapabilityEnquiry(const ASN_RRC_UECapabilityEnquiry &msg);
 
     /* Access Control */
     void performUac(std::shared_ptr<LightSync<UacInput, UacOutput>> &uacCtl);

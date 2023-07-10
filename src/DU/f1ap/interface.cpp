@@ -55,7 +55,7 @@ void F1apTask::sendF1SetupRequest()
 
     std::string *pdu = new std::string();
 
-    *pdu = "F1SetupReqeust|" + std::to_string(m_base->config->getDUId());
+    *pdu = "F1SetupReqeust|" + std::to_string((int32_t)m_base->config->nci);
 
 //        auto *pdu = asn::f1ap::NewMessagePdu<F1SetupRequest>(
 //            {ieGlobalCUId, ieRanNodeName, ieSupportedTaList, iePagingDrx});
@@ -83,6 +83,73 @@ void F1apTask::receiveDLRrcMessageTransfer(std::vector<std::string> msg)
     auto w = std::make_unique<NmDUF1apToRrc>(NmDUF1apToRrc::DL_RRC_TRANSFER);
     w->buffer = msg;
     m_base->rrcTask->push(std::move(w));
+}
+
+void F1apTask::receiveUEContextSetupRequest(std::vector<std::string> msg)
+{
+    //UEContextSetupRequest|CU_UE_ID|sourcePCI|targetPCI
+
+    std::string *pdu = new std::string();
+
+    msg.erase(msg.begin());
+
+    msg.insert(msg.begin(), "UEContextSetupResponse");
+
+    *pdu = Merge(msg);
+
+    sendF1ap(pdu);
+
+    m_logger->debug("Sending UEContextSetupResponse To CU");
+
+//    auto w = std::make_unique<NmDUF1apToRrc>(NmDUF1apToRrc::UE_CONTEXT_SETUP_REQUEST);
+//    w->buffer = msg;
+//    m_base->rrcTask->push(std::move(w));
+}
+
+//void F1apTask::sendUEContextSetupResponse(std::vector<std::string> msg)
+//{
+//    std::string *pdu = new std::string();
+//
+//    msg.erase(msg.begin());
+//
+//    msg.insert(msg.begin(), "UEContextSetupResponse");
+//
+//    *pdu = Merge(msg);
+//
+//    sendF1ap(pdu);
+//}
+
+void F1apTask::receiveUEContextModificationRequest(std::vector<std::string> msg)
+{
+    auto w = std::make_unique<NmDUF1apToRrc>(NmDUF1apToRrc::UE_CONTEXT_MODIFICATION_REQUEST);
+    w->ueId = stoi(msg.at(2));
+    w->targetPCI = stoi(msg.at(4));
+    m_base->rrcTask->push(std::move(w));
+
+    msg.erase(msg.begin());
+    msg.insert(msg.begin(), "UEContextModificationResponse");
+
+    std::string *pdu = new std::string();
+
+    *pdu = Merge(msg);
+
+    sendF1ap(pdu);
+}
+
+void F1apTask::receiveUEContextReleaseCommand(std::vector<std::string> msg)
+{
+    auto w = std::make_unique<NmDUF1apToRrc>(NmDUF1apToRrc::UE_CONTEXT_RELEASE_COMMAND);
+    w->ueId = stoi(msg.at(1));
+    m_base->rrcTask->push(std::move(w));
+}
+
+void F1apTask::sendUEContextReleaseComplete(int ueId)
+{
+    std::string *pdu = new std::string();
+
+    *pdu = "UEContextReleaseComplete|" + std::to_string(ueId);
+
+    sendF1ap(pdu);
 }
 
 

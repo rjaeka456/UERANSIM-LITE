@@ -40,6 +40,7 @@ class F1apTask : public NtsTask
     void deleteCUContext();
     std::string decode(const UniqueBuffer &buffer);
     std::vector<std::string> split(std::string input, char delimiter);
+    std::string Merge(std::vector<std::string> vec);
 
     /* Interface management */
     void handleAssociationSetup(int ascId, int inCount, int outCount);
@@ -49,6 +50,11 @@ class F1apTask : public NtsTask
     void receiveDLRrcMessageTransfer(std::vector<std::string> msg);
     void receiveRrc_DL_CCCH_Message(std::string pdu);
     void receiveRrc_DL_DCCH_Message(std::string pdu);
+    void receiveUEContextSetupRequest(std::vector<std::string> msg);
+    void sendUEContextSetupResponse(std::vector<std::string> msg);
+    void receiveUEContextModificationRequest(std::vector<std::string> msg);
+    void receiveUEContextReleaseCommand(std::vector<std::string> msg);
+    void sendUEContextReleaseComplete(int ueId);
 
     /* Message transport */
     void handleSctpMessage(uint16_t stream, const UniqueBuffer &buffer);

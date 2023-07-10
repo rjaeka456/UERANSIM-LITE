@@ -34,6 +34,8 @@ struct NmDURlsToRrc : NtsMessage
     // UPLINK_RRC
     int ueId{};
 
+    int64_t sti{};
+
     // UPLINK_RRC
     OctetString data;
     rrc::RrcChannel rrcChannel{};
@@ -65,6 +67,8 @@ struct NmDURlsToRls : NtsMessage
     // UPLINK_DATA
     // UPLINK_RRC
     int ueId{};
+
+    int64_t sti{};
 
     // RECEIVE_RLS_MESSAGE
     std::unique_ptr<rls::RlsMessage> msg{};
@@ -119,22 +123,20 @@ struct NmDURrcToF1ap : NtsMessage
     enum PR
     {
         UL_RRC_TRANSFER,
-        INITIAL_NAS_DELIVERY,
-
+        UE_CONTEXT_SETUP_RESPONSE,
+        UE_CONTEXT_RELEASE_COMPLETE,
     } present;
 
     // RRC_PDU_DELIVERY
+    // UE_CONTEXT_SETUP_RESPONSE
     int ueId{};
+
+    // RRC_PDU_DELIVERY
     std::string buffer{};
     rrc::RrcChannel rrcChannel{};
 
-    // INITIAL_NAS_DELIVERY
-    // UPLINK_NAS_DELIVERY
-    OctetString pdu{};
-
-    // INITIAL_NAS_DELIVERY
-    int64_t rrcEstablishmentCause{};
-    std::optional<GutiMobileIdentity> sTmsi{};
+    //UE_CONTEXT_SETUP_RESPONSE
+    std::vector<std::string> msg{};
 
     explicit NmDURrcToF1ap(PR present) : NtsMessage(NtsMessageType::DU_RRC_TO_F1AP), present(present)
     {
@@ -192,14 +194,17 @@ struct NmDUF1apToRrc : NtsMessage
     enum PR
     {
         RADIO_POWER_ON,
-        NAS_DELIVERY,
         AN_RELEASE,
-        PAGING,
         DL_RRC_TRANSFER,
+        UE_CONTEXT_SETUP_REQUEST,
+        UE_CONTEXT_MODIFICATION_REQUEST,
+        UE_CONTEXT_RELEASE_COMMAND,
     } present;
 
     // NAS_DELIVERY
     // AN_RELEASE
+    // UE_CONTEXT_MODIFICATION_REQUEST
+    // UE_CONTEXT_RELEASE_COMMAND
     int ueId{};
 
     // NAS_DELIVERY
@@ -207,9 +212,10 @@ struct NmDUF1apToRrc : NtsMessage
 
     std::vector<std::string> buffer{};
 
-    // PAGING
-    //asn::Unique<ASN_NGAP_FiveG_S_TMSI> uePagingTmsi{};
-    //asn::Unique<ASN_NGAP_TAIListForPaging> taiListForPaging{};
+    // UE_CONTEXT_MODIFICATION_REQUEST
+    long targetPCI{};
+
+
 
     explicit NmDUF1apToRrc(PR present) : NtsMessage(NtsMessageType::DU_F1AP_TO_RRC), present(present)
     {

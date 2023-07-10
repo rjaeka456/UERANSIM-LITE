@@ -66,6 +66,8 @@ void RlsControlTask::onLoop()
             break;
         case NmUeRlsToRls::ASSIGN_CURRENT_CELL:
             m_servingCell = w.cellId;
+            if (w.cause == rrc::AssignCellCause::RRC_RECONFIGURATION)
+                rachOnTarget();
             break;
         default:
             m_logger->unhandledNts(*msg);
@@ -246,6 +248,12 @@ void RlsControlTask::onAckSendTimerExpired()
 
         m_udpTask->send(item.first, msg);
     }
+}
+
+void RlsControlTask::rachOnTarget()
+{
+    auto w = std::make_unique<NmUeRlsToRls>(NmUeRlsToRls::RACH_ON_TARGET);
+    m_mainTask->push(std::move(w));
 }
 
 } // namespace nr::ue

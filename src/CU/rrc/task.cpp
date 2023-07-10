@@ -50,6 +50,7 @@ void CURrcTask::onLoop()
             break;
         }
         case NmCUF1apToRrc::RECEIVE_DCCH_Message: {
+            handleUplinkRrcDCCH(w.duId, w.gNB_DU_ID, w.data);
             break;
         }
         }

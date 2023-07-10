@@ -38,4 +38,48 @@ RrcUeContext *CURrcTask::findUe(int id)
     return ue;
 }
 
+RrcUeContext *CURrcTask::findUeByGNB_DU_UE_ID(int gNB_DU_ID, int GNB_DU_UE_ID)
+{
+    RrcUeContext *ue = nullptr;
+
+    for (auto& it : m_ueCtx)
+    {
+        if((it.second->gNB_DU_ID == gNB_DU_ID) and (it.second->GNB_DU_UE_ID == GNB_DU_UE_ID))
+        {
+            ue = it.second;
+            break;
+        }
+    }
+
+    if (ue == nullptr)
+    {
+        m_logger->err("UE context with DU[%d], DU_UE_ID[%d] not found", gNB_DU_ID, GNB_DU_UE_ID);
+        return ue;
+    }
+
+    return ue;
+}
+
+RrcUeContext *CURrcTask::findUeBySti(int64_t sti)
+{
+    RrcUeContext *ue = nullptr;
+
+    for (auto& it : m_ueCtx)
+    {
+        if(it.second->sti == sti)
+        {
+            ue = it.second;
+            break;
+        }
+    }
+
+    if (ue == nullptr)
+    {
+        m_logger->err("UE context with sti[%d] not found", sti);
+        return ue;
+    }
+
+    return ue;
+}
+
 } // namespace nr::CU
