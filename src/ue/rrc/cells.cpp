@@ -12,8 +12,8 @@
 #include <ue/nas/task.hpp>
 
 #define hysteresis_parameter 3
-#define A2_Threshold -111
-#define A4_Threshold -142
+#define A2_Threshold -70
+#define A4_Threshold -80
 #define NeighCellOffset 1
 
 namespace nr::ue

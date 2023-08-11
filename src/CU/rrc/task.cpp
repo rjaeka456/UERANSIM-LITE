@@ -14,11 +14,29 @@
 static constexpr const int TIMER_ID_SI_BROADCAST = 1;
 static constexpr const int TIMER_PERIOD_SI_BROADCAST = 10'000;
 
+static std::string get_time_stamp()
+{
+    const auto now = std::chrono::system_clock::now();
+    time_t tm_now = std::chrono::system_clock::to_time_t(now);
+    struct tm tstruct = *localtime(&tm_now);
+
+    auto duration = now.time_since_epoch();
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1000;
+
+    char temp[128];
+    snprintf(temp, sizeof(temp), "%04d%02d%02d_%02d:%02d:%02d.%03ld",
+             tstruct.tm_year + 1900, tstruct.tm_mon + 1, tstruct.tm_mday,
+             tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec, millis.count());
+
+    return std::string(temp);
+}
+
 namespace nr::CU
 {
 
 CURrcTask::CURrcTask(TaskBase *base) : m_base{base}, m_ueCtx{}, m_tidCounter{}
 {
+    excutionTime = get_time_stamp();
     m_logger = base->logBase->makeUniqueLogger("rrc");
     m_config = m_base->config;
 }

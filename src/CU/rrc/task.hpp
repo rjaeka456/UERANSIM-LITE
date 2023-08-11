@@ -40,6 +40,7 @@ class CURrcTask : public NtsTask
     TaskBase *m_base;
     CUConfig *m_config;
     std::unique_ptr<Logger> m_logger;
+    std::string excutionTime;
 
     std::unordered_map<int, RrcUeContext *> m_ueCtx;
     int m_tidCounter;

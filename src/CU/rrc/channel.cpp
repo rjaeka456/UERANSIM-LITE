@@ -13,6 +13,24 @@
 
 #include <asn/rrc/ASN_RRC_UL-CCCH-Message.h>
 #include <asn/rrc/ASN_RRC_UL-DCCH-Message.h>
+#include <fstream>
+
+static std::string get_time_stamp()
+{
+    const auto now = std::chrono::system_clock::now();
+    time_t tm_now = std::chrono::system_clock::to_time_t(now);
+    struct tm tstruct = *localtime(&tm_now);
+
+    auto duration = now.time_since_epoch();
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration) % 1000;
+
+    char temp[128];
+    snprintf(temp, sizeof(temp), "%04d%02d%02d_%02d:%02d:%02d.%03ld",
+             tstruct.tm_year + 1900, tstruct.tm_mon + 1, tstruct.tm_mday,
+             tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec, millis.count());
+
+    return std::string(temp);
+}
 
 namespace nr::CU
 {
@@ -23,6 +41,9 @@ void CURrcTask::handleUplinkRrcCCCH(int duId, int gNB_DU_ID, std::string data)
     if (msg.front() == "RRCSetupRequest")
     {
         receiveRrcSetupRequest(duId, gNB_DU_ID, data);
+        std::ofstream fout("./log_" + excutionTime + ".txt", std::ios::out|std::ios::app);
+        fout << "[" << get_time_stamp() << "]" << duId << "|" << data << std::endl;
+        fout.close();
     }
 }
 
@@ -38,6 +59,9 @@ void CURrcTask::handleUplinkRrcDCCH(int duId, int gNB_DU_ID, std::string data)
     else if (msgType == "MeasurementReport")
     {
         receiveMeasurementReport(duId, gNB_DU_ID, data);
+        std::ofstream fout("./log_" + excutionTime + ".txt", std::ios::out|std::ios::app);
+        fout << "[" << get_time_stamp() << "]" << duId << "|" << data << std::endl;
+        fout.close();
     }
     else if (msgType == "RRCReconfigurationComplete")
     {
@@ -235,6 +259,7 @@ void CURrcTask::receiveRrcMessage(int ueId, ASN_RRC_UL_DCCH_Message *msg)
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_locationMeasurementIndication:
         break; // TODO
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_ueCapabilityInformation:
+
         break; // TODO
     case ASN_RRC_UL_DCCH_MessageType__c1_PR_counterCheckResponse:
         break; // TODO

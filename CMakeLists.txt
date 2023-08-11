@@ -16,6 +16,7 @@ add_subdirectory(src/asn/ngap)
 add_subdirectory(src/lib)
 add_subdirectory(src/CU)
 add_subdirectory(src/DU)
+#add_subdirectory(src/FBS)
 add_subdirectory(src/ue)
 
 #################### CU EXECUTABLE ####################
@@ -42,6 +43,18 @@ target_compile_options(nr-DU PRIVATE -Wall -Wextra -pedantic)
 target_link_libraries(nr-DU asn-rrc)
 target_link_libraries(nr-DU common-lib)
 target_link_libraries(nr-DU DU)
+
+#################### FBS EXECUTABLE ####################
+
+#add_executable(nr-FBS src/FBS.cpp)
+
+#target_link_libraries(nr-FBS pthread)
+
+#target_compile_options(nr-FBS PRIVATE -Wall -Wextra -pedantic)
+
+#target_link_libraries(nr-FBS asn-rrc)
+#target_link_libraries(nr-FBS common-lib)
+#target_link_libraries(nr-FBS FBS)
 
 #################### UE EXECUTABLE ####################
 
